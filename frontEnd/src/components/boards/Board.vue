@@ -16,9 +16,9 @@
           >
           </vue-signaturePad>
 
-          <v-btn class="my-2" small @click="clearCanvas">지우기</v-btn>
+          <v-btn class="mt-2" small @click="clearCanvas">지우기</v-btn>
 
-          <v-card-actions class="px-0">
+          <v-card-actions class="pa-0">
             <v-spacer></v-spacer>
             <v-btn color="error white--text" small @click="closeDialog">
               취소
