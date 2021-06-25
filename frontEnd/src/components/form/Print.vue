@@ -1,0 +1,162 @@
+<template>
+  <div class="a4 print-area">
+    <table id="print-form">
+      <thead>
+        <tr>
+          <th colspan="6">노인맞춤돌봄서비스 후원물품 인수증</th>
+        </tr>
+        <tr>
+          <th colspan="2">후원처</th>
+          <th colspan="2">독거노인종합지원센터</th>
+          <th>품목</th>
+          <th>효 박스</th>
+        </tr>
+        <tr>
+          <th>연번</th>
+          <th>수령일</th>
+          <th>성명</th>
+          <th>생년월일</th>
+          <th>수량</th>
+          <th>수령확인(개인)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 단일 반복문 이용한 출력 -->
+        <tr v-for="data in tdItems" :key="data.idx">
+          <td>{{ data.idx }}</td>
+          <td>{{ data.receivedDate }}</td>
+          <td>{{ data.name }}</td>
+          <td>{{ data.birthDate }}</td>
+          <td>{{ data.amount }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+export default {
+  data: () => ({
+    tdItems: [
+      {
+        idx: 1,
+        name: "홍길동",
+        birthDate: "1999-07-26",
+        amount: 1,
+        receivedDate: "1923-03-26",
+      },
+      {
+        idx: 2,
+        name: "홍길동",
+        birthDate: "1999-07-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 3,
+        name: "홍길동",
+        birthDate: "1999-07-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 4,
+        name: "홍길동",
+        birthDate: "1999-07-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 5,
+        name: "홍길동",
+        birthDate: "1999-07-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 6,
+        name: "김상만",
+        birthDate: "1993-08-21",
+        amount: 2,
+        receivedDate: null,
+      },
+      {
+        idx: 7,
+        name: "최길자",
+        birthDate: "1923-03-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 8,
+        name: "최길자",
+        birthDate: "1923-03-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 9,
+        name: "최길자",
+        birthDate: "1923-03-26",
+        amount: 1,
+        receivedDate: null,
+      },
+      {
+        idx: 10,
+        name: "최길자",
+        birthDate: "1923-03-26",
+        amount: 1,
+        receivedDate: null,
+      },
+    ],
+  }),
+};
+</script>
+
+<style scoped>
+/* 테이블 전체 디자인 */
+#print-form {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 15pt;
+}
+/* 헤드 첫줄 제목 디자인 */
+#print-form thead > tr:nth-child(1) {
+  font-size: 25pt;
+}
+/* 테이블 헤드의 th 디자인 */
+#print-form thead th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* 테이블 바디 여백 */
+#print-form tbody td {
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+
+/* 테이블 테두리 한줄 설정 */
+#print-form,
+td,
+th {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+/* A4 사이즈 설정 */
+@page a4sheet {
+  size: 21cm 29.7cm;
+}
+.a4 {
+  page: a4sheet;
+  page-break-after: always;
+}
+
+.print-area {
+  display: flex;
+  align-items: center;
+}
+</style>
