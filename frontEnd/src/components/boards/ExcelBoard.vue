@@ -27,28 +27,31 @@
         <template v-slot:top>
           <div class="loaded-table-top">
             <div class="loaded-table-title-area">
-              <h3 class="loaded-table-title">
+              <div class="loaded-table-title table-title-text">
                 <span class="title-text">불러온 데이터</span>
                 <v-icon class="title-icon" color="rgb(31, 111, 68)">
                   mdi-microsoft-excel
                 </v-icon>
-              </h3>
+              </div>
             </div>
-            <div>
+            <div class="btn-group">
               <v-btn
                 id="table-clear-btn"
                 :disabled="excelData.length <= 0"
                 color="error"
                 @click="clearTable"
               >
-                데이터 초기화
+                <span class="btn-text">데이터 초기화</span>
+                <v-icon class="icon-in-btn"> mdi-sync </v-icon>
               </v-btn>
               <v-btn
+                id="save-to-db-btn"
                 :disabled="excelData.length <= 0"
                 class="white--text"
                 color="rgb(31, 111, 68)"
               >
-                DB 저장
+                <span class="btn-text"> DB 저장</span>
+                <v-icon class="icon-in-btn"> mdi-database-plus </v-icon>
               </v-btn>
             </div>
           </div>
@@ -161,6 +164,7 @@ export default {
 }
 #close-btn {
   color: black;
+  text-align: center;
 }
 
 .contents-wrap {
@@ -179,11 +183,17 @@ export default {
 }
 .loaded-table-top {
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 #table-clear-btn {
   margin-right: 8px;
+  text-align: center;
 }
+#save-to-db-btn {
+  text-align: center;
+}
+
 .loaded-table-title-area {
   width: fit-content;
   padding-bottom: 8px;
@@ -194,8 +204,86 @@ export default {
   align-items: center;
   justify-content: center;
 }
+.table-title-text {
+  font-size: 24px;
+  font-weight: bold;
+}
 .title-icon {
   padding-left: 15px;
   padding-right: 15px;
+}
+.btn-group {
+  display: flex;
+}
+
+.btn-text {
+  display: initial;
+}
+.icon-in-btn {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  #file-input {
+    border: 2px solid;
+    border-radius: 5px;
+    padding-left: 2px;
+    width: 180px;
+    font-size: 10px;
+  }
+
+  .btn-group {
+    display: flex;
+    margin-right: 8px;
+  }
+  .btn-text {
+    display: none;
+  }
+  .icon-in-btn {
+    display: initial;
+  }
+  #table-clear-btn {
+    margin-right: 8px;
+    text-align: center;
+    width: fit-content;
+  }
+
+  #save-to-db-btn {
+    text-align: center;
+    width: fit-content;
+  }
+  .btn-group button.v-btn {
+    min-width: 0;
+    padding: 10px;
+  }
+
+  .table-title-text {
+    font-size: 16px;
+    font-style: bold;
+  }
+}
+/*제일 작은 모바일 사이즈(세로) */
+@media screen and (max-width: 465px) {
+  .v-data-table::v-deep th {
+    font-size: 2px !important;
+    text-align: center;
+    padding: 1px !important;
+  }
+  .v-data-table::v-deep td {
+    font-size: 1px !important;
+    padding: 1px !important;
+  }
+}
+/*제일 작은 모바일 사이즈(가로) */
+@media screen and (min-width: 465px) and (max-width: 600px) {
+  .v-data-table::v-deep th {
+    font-size: 2px !important;
+    text-align: center;
+    padding: 1px !important;
+  }
+  .v-data-table::v-deep td {
+    font-size: 1px !important;
+    padding: 1px !important;
+  }
 }
 </style>
