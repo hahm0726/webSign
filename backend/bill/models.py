@@ -9,3 +9,11 @@ class Bill(models.Model):
     amount = models.IntegerField(verbose_name="수량",default=0, blank=True) #수량
     receiveDate = models.CharField(verbose_name="수령일",max_length=10, null=True, blank=True) #수령일(YYYY-MM-DD)
     state = models.BooleanField(verbose_name="수령상태",default=False, null=True, blank=True) #수령상태(수령:True / 수령전:False)
+    signature = models.TextField(verbose_name="서명",null=True, blank=True) #서명
+    created = models.DateTimeField(verbose_name="생성일", auto_now_add=True)#생성일
+    updated = models.DateTimeField(verbose_name="수정일", auto_now=True)#수정일
+
+    class Meta:
+        verbose_name = '인수증'
+        verbose_name_plural = '인수증'
+        ordering = ['idx', ]
