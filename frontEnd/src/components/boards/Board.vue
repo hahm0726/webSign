@@ -73,6 +73,7 @@
 
 <script>
 // import Print from "@/components/form/Print";
+import { Printd } from "printd";
 
 export default {
   data: () => ({
@@ -194,7 +195,10 @@ export default {
       console.log(isEmpty);
       console.log(data);
     },
-    print() {},
+    print() {
+      const d = new Printd();
+      d.printURL("http://localhost:8080/print/");
+    },
   },
 };
 </script>
