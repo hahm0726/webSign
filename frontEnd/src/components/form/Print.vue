@@ -22,13 +22,23 @@
       </thead>
       <tbody>
         <!-- 단일 반복문 이용한 출력 -->
-        <tr v-for="data in tdItems" :key="data.idx">
-          <td>{{ data.idx }}</td>
-          <td>{{ data.receivedDate }}</td>
-          <td>{{ data.name }}</td>
-          <td>{{ data.birthDate }}</td>
-          <td>{{ data.amount }}</td>
-          <td></td>
+        <tr v-for="i in 10" :key="i">
+          <td v-if="i <= print_data_len">
+            {{ print_data[i - 1].idx }}
+          </td>
+          <td v-else></td>
+          <td v-if="i <= print_data_len">
+            {{ print_data[i - 1].receivedDate }}
+          </td>
+          <td v-else></td>
+          <td v-if="i <= print_data_len">{{ print_data[i - 1].name }}</td>
+          <td v-else></td>
+          <td v-if="i <= print_data_len">{{ print_data[i - 1].birthDate }}</td>
+          <td v-else></td>
+          <td v-if="i <= print_data_len">{{ print_data[i - 1].amount }}</td>
+          <td v-else></td>
+          <td v-if="i <= print_data_len"></td>
+          <td v-else></td>
         </tr>
       </tbody>
     </table>
@@ -37,79 +47,13 @@
 
 <script>
 export default {
+  props: ["print_data"],
+  created() {
+    this.print_data_len = this.print_data.length;
+    console.log(this.print_data_len);
+  },
   data: () => ({
-    tdItems: [
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        amount: 1,
-        receivedDate: "1923-03-26",
-      },
-      {
-        idx: 2,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 3,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 4,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 5,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 6,
-        name: "김상만",
-        birthDate: "1993-08-21",
-        amount: 2,
-        receivedDate: null,
-      },
-      {
-        idx: 7,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 8,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 9,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        amount: 1,
-        receivedDate: null,
-      },
-      {
-        idx: 10,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        amount: 1,
-        receivedDate: null,
-      },
-    ],
+    print_data_len: "",
   }),
 };
 </script>
@@ -134,8 +78,7 @@ export default {
 
 /* 테이블 바디 여백 */
 #print-form tbody td {
-  padding-top: 25px;
-  padding-bottom: 25px;
+  height: 80px;
 }
 
 /* 테이블 테두리 한줄 설정 */
