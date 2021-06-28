@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-#기본적으로 설치되어있던 장고 앱
+# 기본적으로 설치되어있던 장고 앱
 DJANGO_DFAULT_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,16 +39,17 @@ DJANGO_DFAULT_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-#생성한 앱
-CREATED_NEW_APP=[
+# 생성한 앱
+CREATED_NEW_APP = [
     'bill',
+    'users',
 ]
 
-#설치한 외부 라이브러리
-EXTERN_LIBRARY=['rest_framework',]
+# 설치한 외부 라이브러리
+EXTERN_LIBRARY = ['rest_framework', ]
 
 
-INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP+ EXTERN_LIBRARY
+INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP + EXTERN_LIBRARY
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -114,7 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
 TIME_ZONE = 'UTC'
 
@@ -134,3 +136,6 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# AbstractUser 이용하여 커스텀한 유저 모델 등록
+AUTH_USER_MODEL = "users.User"

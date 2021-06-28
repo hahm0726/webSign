@@ -33,3 +33,15 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media
+
+### venv ###
+bin/
+lib/
+pyvenv.cfg
+
+### nodeenv ###
+include/
+share/
+src/
+
+*__init__.py
