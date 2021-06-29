@@ -30,4 +30,10 @@
       <li>f_loadExcel - 엑셀파일 데이터 읽기 구현</li>
     </ul>
   </li>
+   <li>
+    2021-06-29
+    <ul>
+      <li>f_backEnd_Bill - Bill(인수증) CRUD API 구현</li>
+    </ul>
+  </li>
   </ul>
