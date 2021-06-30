@@ -49,12 +49,34 @@
                 :disabled="excelData.length <= 0"
                 class="white--text"
                 color="rgb(31, 111, 68)"
+                @click="saveExcelData"
               >
                 <span class="btn-text"> DB 저장</span>
                 <v-icon class="icon-in-btn"> mdi-database-plus </v-icon>
               </v-btn>
             </div>
           </div>
+        </template>
+
+        <template v-slot:[`item.idx`]="{item}">
+          <input :id="item.idx + '_idx'" type="number" v-model="item.idx">
+        </template>
+        <template v-slot:[`item.name`]="{item}">
+          <input :id="item.idx + '_name'" type="text" v-model="item.name">
+        </template>
+        <template v-slot:[`item.birthDate`]="{item}">
+          <input :id="item.idx + 'birthDate'" type="text" v-model="item.birthDate">
+        </template>
+        <template v-slot:[`item.location`]="{item}">
+          <input :id="item.idx + '_location'" type="text" v-model="item.location">
+        </template>
+        <template v-slot:[`item.amount`]="{item}">
+          <input :id="item.idx + '_amount'" type="number" v-model="item.amount">
+        </template>
+        <template v-slot:[`item.action`]="{item}">
+          <v-icon @click="deleteItem(item)">
+            mdi-delete
+          </v-icon>
         </template>
       </v-data-table>
     </main>
@@ -63,6 +85,8 @@
 
 <script>
 import XLSX from "xlsx";
+import * as billApi from "/src/api/billApi"
+
 export default {
   data: () => ({
     noDataText: "아직 불러온 데이터가 없습니다",
@@ -77,13 +101,7 @@ export default {
       },
       { text: "거주동", value: "location", sortable: false, align: "center" },
       { text: "수량", value: "amount", sortable: false, align: "center" },
-      {
-        text: "수령일",
-        value: "receivedDate",
-        sortable: false,
-        align: "center",
-      },
-      { text: "수령상태", value: "state", sortable: false, align: "center" },
+      {text:"작업", value: "action", sortable:false, align: "center"},
     ],
     itemsPerPage: 10,
     excelData: [],
@@ -104,7 +122,8 @@ export default {
         return;
       }
       var reader = new FileReader();
-      this.clearTable();
+      this.excelData = [];
+
       const header = ["idx", "name", "birthDate", "location"];
       reader.onload = () => {
         var data = reader.result;
@@ -121,12 +140,13 @@ export default {
             raw: false,
           });
           for (var i = 0; i < rows.length; i++) {
+            rows[i].amount=0;
             this.excelData.push(rows[i]);
           }
         });
       };
       reader.readAsBinaryString(file);
-      console.log(this.excelData);
+
     },
 
     //파일타입 검사
@@ -137,9 +157,29 @@ export default {
       }
       return false;
     },
+    //읽은 엑셀데이터 테이블 비우기
     clearTable() {
+      const fileinput = document.querySelector('#file-input');
+      fileinput.files = null;
+      fileinput.value = null;
       this.excelData = [];
     },
+
+    //읽은 엑셀 데이터 DB에 저장
+    saveExcelData(){
+      billApi.createBillList(this.excelData)
+      .then(()=>{
+        this.$emit("excelDataSaved");
+      })
+      .catch(err=>{
+        console.log(err);
+      })
+    },
+    //해당 데이터 행 삭제
+    deleteItem(item){
+      const toDeleteItemIndex = this.excelData.indexOf(item)
+      this.excelData.splice(toDeleteItemIndex, 1) 
+    }
   },
 };
 </script>
@@ -222,6 +262,24 @@ export default {
 .icon-in-btn {
   display: none;
 }
+
+.loaded-table input{
+  text-align: center;
+}
+.loaded-table input[type="text"]{
+  width:100%;
+  
+}
+.loaded-table input[type="number"]{
+  width:50%;
+}
+
+.loaded-table input[type="number"]::-webkit-outer-spin-button,
+.loaded-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 
 @media screen and (max-width: 600px) {
   #file-input {

@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import * as billApi from "/src/api/billApi"
+
 export default {
   data: () => ({
     dialog: false, //다이얼로그 상태값
@@ -90,72 +92,12 @@ export default {
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
     tdItems: [
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 2,
-        name: "김상만",
-        birthDate: "1993-08-21",
-        location: "안양1동",
-        amount: 2,
-        receivedDate: null,
-        state: false,
-      },
-      {
-        idx: 3,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        location: "안양1동",
-        amount: 1,
-        receivedDate: null,
-        state: false,
-      },
+     
     ],
   }),
-
+  created(){
+    this.getAllBill();
+  },
   methods: {
     // 수령 상태 출력 변환
     isReceived: function (val) {
@@ -164,7 +106,7 @@ export default {
     },
     //수령날짜 출력 변환
     receivedDate: function (val) {
-      if (val === null) return "수령 전";
+      if (val == null) return "수령 전";
       return val;
     },
     //다이얼로그 열기
@@ -185,6 +127,17 @@ export default {
       console.log(isEmpty);
       console.log(data);
     },
+    //모든 bill데이터 받아오기
+    getAllBill(){
+      billApi.getBillAll()
+      .then(res=>{
+        this.tdItems = res.data;
+        console.log(this.tdItems);
+      })
+      .catch(err=>{
+        console.log(err);
+      })
+    }
   },
 };
 </script>
