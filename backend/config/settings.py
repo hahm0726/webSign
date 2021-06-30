@@ -45,12 +45,16 @@ CREATED_NEW_APP=[
 ]
 
 #설치한 외부 라이브러리
-EXTERN_LIBRARY=['rest_framework',]
+EXTERN_LIBRARY=[
+    'rest_framework',
+    'corsheaders',
+]
 
 
 INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP+ EXTERN_LIBRARY
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', # CORS 관련 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -135,3 +139,11 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ORIGIN_WHITELIST = [
+    'http://127.0.0.1:8080',
+    'http://localhost:8080'
+]
+CORS_ALLOW_CREDENTIALS = True
+
+

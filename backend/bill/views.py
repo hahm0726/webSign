@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializers import BillSerializer
+from .serializers import BillSerializer,BillListSerializer
 from .models import Bill
 
 
@@ -27,5 +27,6 @@ class BillListViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Bill.objects.all()
-    serializer_class = BillSerializer
+    serializer_class = BillListSerializer
+
     
