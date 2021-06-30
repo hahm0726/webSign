@@ -14,7 +14,7 @@ class BillSerializer(serializers.ModelSerializer):
             "birthDate",
             "location",
             "amount",
-            "receiveDate",
+            "receivedDate",
             "state",
             "signature"]
     
@@ -78,3 +78,5 @@ class BillListSerializer(serializers.ListSerializer):
     Bill의 여러 객체에 대한 처리를 한번에 수행하는 serializer
     """
     child = BillSerializer()
+
+    

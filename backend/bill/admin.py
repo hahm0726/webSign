@@ -9,7 +9,7 @@ class BillAdmin(admin.ModelAdmin):
         "birthDate",
         "location",
         "amount",
-        "receiveDate",
+        "receivedDate",
         "state",
         "signature",
         "created",
