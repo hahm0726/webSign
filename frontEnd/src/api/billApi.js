@@ -25,16 +25,26 @@ function deleteBill (billId){
     return axiosService.delete(url);
 }
 
-/*다중 인수증 데이터 정보 요청(검증 요망)*/
+/*다중 인수증 데이터 정보 요청*/
 function getBillAll (){
     const url = '/bills/bill/';
     return axiosService.get(url);
 }
 
-/*다중 인수증 데이터 생성 요청(검증 요망)*/
+/*다중 인수증 데이터 생성 요청*/
 function createBillList (billListData){
     const url = '/bills/bill-list/';
     return axiosService.post(url,billListData);
+}
+/*다중 인수증 데이터 수정 요청(검증 요망)*/
+function updateBillList (billListData){
+    const url = '/bills/bill-list/';
+    return axiosService.patch(url,billListData);
+}
+/*다중 인수증 데이터 삭제 요청(검증 요망)*/
+function deleteBillList (billListData){
+    const url = '/bills/bill-list/';
+    return axiosService.delete(url,billListData);
 }
 
 export {
@@ -44,4 +54,6 @@ export {
     deleteBill,
     getBillAll,
     createBillList,
+    updateBillList,
+    deleteBillList,
 }

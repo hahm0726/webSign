@@ -106,10 +106,11 @@ export default {
     itemsPerPage: 10,
     excelData: [],
   }),
+  
   methods: {
     //다이얼로그 닫기 동작
     closeExcelDialog() {
-      this.$emit("closeExcelDialog");
+      this.$emit("closeDialog");
     },
 
     //입력된 파일 읽기
@@ -178,7 +179,10 @@ export default {
     //해당 데이터 행 삭제
     deleteItem(item){
       const toDeleteItemIndex = this.excelData.indexOf(item)
-      this.excelData.splice(toDeleteItemIndex, 1) 
+      this.excelData.splice(toDeleteItemIndex, 1)
+      if(this.excelData.length == 0){
+        this.clearTable();
+      }
     }
   },
 };

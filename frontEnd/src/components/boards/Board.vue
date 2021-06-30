@@ -4,7 +4,6 @@
     class="tables"
     :headers="thItems"
     :items="tdItems"
-    :items-per-page="itemsPerPage"
     hide-default-footer
   >
     <template v-slot:top>
@@ -24,7 +23,6 @@
           </vue-signaturePad>
 
           <v-btn class="mt-2" small @click="clearCanvas">지우기</v-btn>
-
           <v-card-actions class="pa-0">
             <v-spacer></v-spacer>
             <v-btn color="error white--text" small @click="closeDialog">
@@ -37,7 +35,6 @@
         </v-card>
       </v-dialog>
     </template>
-
     <template v-slot:[`item.receivedDate`]="{ item }">
       {{ receivedDate(item.receivedDate) }}
     </template>
@@ -52,15 +49,6 @@
         mdi-draw
       </v-icon>
     </template>
-    <template v-slot:footer>
-      <v-pagination
-        v-model="page"
-        :length="pageCount"
-        :total-visible="totalVisible"
-        next-icon="mdi-menu-right"
-        prev-icon="mdi-menu-left"
-      ></v-pagination>
-    </template>
   </v-data-table>
 </template>
 
@@ -70,7 +58,6 @@ import * as billApi from "/src/api/billApi"
 export default {
   data: () => ({
     dialog: false, //다이얼로그 상태값
-    itemsPerPage: 10, // 테이블 페이지당 보여지는 아이템 수
     thItems: [
       { text: "연번", value: "idx", sortable: false, align: "center" },
       { text: "이름", value: "name", sortable: false, align: "center" },
@@ -91,9 +78,7 @@ export default {
       { text: "수령상태", value: "state", sortable: false, align: "center" },
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
-    tdItems: [
-     
-    ],
+    tdItems: [],
   }),
   created(){
     this.getAllBill();
@@ -132,7 +117,6 @@ export default {
       billApi.getBillAll()
       .then(res=>{
         this.tdItems = res.data;
-        console.log(this.tdItems);
       })
       .catch(err=>{
         console.log(err);

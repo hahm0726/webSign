@@ -1,12 +1,12 @@
 <template>
   <v-app id="app">
     <v-dialog
-      v-model="excelDialog"
+      v-model="dialog"
       fullscreen
       hide-overlay
       transition="dialog-bottom-transition"
     >
-      <excel-board @closeExcelDialog="closeExcelDialog"></excel-board>
+      <component :is="selectedBoard" @closeDialog="closeDialog"></component>
     </v-dialog>
     <header id="app-header">
       <v-spacer />
@@ -17,9 +17,9 @@
             mdi-microsoft-excel
           </v-icon>
         </v-btn>
-        <v-btn id="add-data-btn" elevation="0">
-          <span class="btn-text">데이터 추가</span>
-          <v-icon class="icon-in-btn">mdi-plus</v-icon>
+        <v-btn id="add-data-btn" elevation="0" @click="openUpdateDialog">
+          <span class="btn-text">데이터 수정</span>
+          <v-icon class="icon-in-btn">mdi-pencil-outline</v-icon>
         </v-btn>
       </div>
     </header>
@@ -34,29 +34,55 @@
 <script>
 import Board from "/src/components/boards/Board";
 import ExcelBoard from "/src/components/boards/ExcelBoard";
+import UpdateBoard from "/src/components/boards/UpdateBoard";
 
 export default {
   components: {
     Board,
     ExcelBoard,
+    UpdateBoard,
+
   },
   data: () => ({
+    dialog:false,
     excelDialog: false,
+    updateDialog: false,
+    selectedBoard:null,
   }),
   computed: {
     //선택된 컴포넌트 반환
     selectedComponent: function () {
       return Board;
     },
+    
   },
   methods: {
-    //다이얼로그 열기
+    //엑셀 다이얼로그 열기
     openExcelDialog() {
+      this.selectedBoard=ExcelBoard,
       this.excelDialog = true;
+      this.dialog = this.excelDialog;
     },
-    //다이얼로그 닫기
+    //엑셀 다이얼로그 닫기
     closeExcelDialog() {
       this.excelDialog = false;
+      this.dialog = this.excelDialog;
+    },
+    //수정 다이얼로그 열기
+    openUpdateDialog() {
+      this.selectedBoard=UpdateBoard,
+      this.updateDialog = true;
+      this.dialog = this.updateDialog;
+    },
+    //수정 다이얼로그 닫기
+    closeUpdateDialog() {
+      this.updateDialog = false;
+      this.dialog = this.updateDialog;
+    },
+    //열린 다이얼로그에 따라 다이얼로그 닫기 함수 선택 제공
+    closeDialog() {
+      if(this.excelDialog) return this.closeExcelDialog();
+      if(this.updateDialog) return this.closeUpdateDialog();
     },
   },
 };
