@@ -1,87 +1,69 @@
 <template>
-  <div>
-    <v-btn @click="print">인쇄</v-btn>
-    <v-data-table
-      mobile-breakpoint="0"
-      class="tables"
-      :headers="thItems"
-      :items="tdItems"
-      :items-per-page="itemsPerPage"
-      hide-default-footer
-    >
-      <template v-slot:top>
-        <v-dialog v-model="dialog" persistent max-width="500px">
-          <v-card class="pa-2">
-            <vue-signaturePad
-              class="canvas-color"
-              width="100%"
-              height="200px"
-              ref="signaturePad"
-              :options="{
-                onBegin: () => {
-                  $refs.signaturePad.resizeCanvas();
-                },
-              }"
-            >
-            </vue-signaturePad>
-
-            <v-btn class="mt-2" small @click="clearCanvas">지우기</v-btn>
-
-            <v-card-actions class="pa-0">
-              <v-spacer></v-spacer>
-              <v-btn color="error white--text" small @click="closeDialog">
-                취소
-              </v-btn>
-              <v-btn
-                color="blue darken-1 white--text"
-                small
-                @click="closeDialog"
-              >
-                서명완료
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </template>
-
-      <template v-slot:[`item.receivedDate`]="{ item }">
-        {{ receivedDate(item.receivedDate) }}
-      </template>
-      <template v-slot:[`item.state`]="{ item }">
-        {{ isReceived(item.state) }}
-      </template>
-      <template v-slot:[`item.action`]="{ item }">
-        <v-icon v-if="item.state" @click="openDialog(item)">
-          mdi-text-box-search-outline
-        </v-icon>
-        <v-icon v-else :disabled="item.state" @click="openDialog(item)">
-          mdi-draw
-        </v-icon>
-      </template>
-      <template v-slot:footer>
-        <v-pagination
-          v-model="page"
-          :length="pageCount"
-          :total-visible="totalVisible"
-          next-icon="mdi-menu-right"
-          prev-icon="mdi-menu-left"
-        ></v-pagination>
-      </template>
-    </v-data-table>
-    <!-- 프린트 영역 페이지에 안보이도록 출력 -->
-    <print v-bind:print_data="this.tdItems" class="print-visible"></print>
-  </div>
+  <v-data-table
+    mobile-breakpoint="0"
+    class="tables loaded-table"
+    :headers="thItems"
+    :items="tdItems"
+    hide-default-footer
+  >
+    <template v-slot:top>
+      
+      <v-dialog v-model="dialog" persistent max-width="500px">
+        <component :is="selectedDialog" @closeDialog="closeDialog" @reRender="getAllBill" :item="selectedItem"></component>
+      </v-dialog>
+      <print v-bind:print_data="this.tdItems" class="print-visible"></print>
+      <div class="loaded-table-top">
+        <div class="loaded-table-title-area">
+          <div class="loaded-table-title table-title-text">
+            <span class="title-input" role="textbox" @input="onTitleInput($event)" contenteditable>{{formTitle}}</span>
+            <v-icon class="title-icon" color="black">
+                  mdi-file-document-outline
+            </v-icon>
+          </div>
+        </div>
+        <v-btn @click="print">인쇄</v-btn>
+      </div>
+    </template>
+    <template v-slot:[`item.receivedDate`]="{ item }">
+      {{ receivedDate(item.receivedDate) }}
+    </template>
+    <template v-slot:[`item.state`]="{ item }">
+      {{ isReceived(item.signature) }}
+    </template>
+    <template v-slot:[`item.action`]="{ item }">
+      <v-icon v-if="item.signature == null || item.signature== undefined"
+              @click="openSignDialog(item)"
+      >
+        mdi-draw
+      </v-icon>
+      <v-icon v-else @click="openImgDialog(item)">
+        mdi-text-box-search-outline
+      </v-icon>   
+    </template>
+  </v-data-table>
 </template>
 
 <script>
 import { Printd } from "printd";
 import Print from "@/components/form/Print";
+import SignDialog from "/src/components/dialog/SignDialog"
+import ImgDialog from "/src/components/dialog/ImgDialog"
+import * as billApi from "/src/api/billApi"
+
 
 export default {
-  components: { Print },
+  components: { 
+    Print,
+    SignDialog,
+    ImgDialog,
+  },
   data: () => ({
-    dialog: false, //다이얼로그 상태값
-    itemsPerPage: 10, // 테이블 페이지당 보여지는 아이템 수
+    formTitle:"인수증",
+    dialog:false,
+    signDialog:false,
+    imgDialog:false,
+    selectedDialog:null,
+    selectedItem: {},
     thItems: [
       { text: "연번", value: "idx", sortable: false, align: "center" },
       { text: "이름", value: "name", sortable: false, align: "center" },
@@ -102,101 +84,70 @@ export default {
       { text: "수령상태", value: "state", sortable: false, align: "center" },
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
-    tdItems: [
-      {
-        idx: 1,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 2,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 3,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 4,
-        name: "길동홍",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 5,
-        name: "홍길동",
-        birthDate: "1999-07-26",
-        location: "안양2동",
-        amount: 1,
-        receivedDate: null,
-        state: true,
-      },
-      {
-        idx: 6,
-        name: "김상만",
-        birthDate: "1993-08-21",
-        location: "안양1동",
-        amount: 2,
-        receivedDate: null,
-        state: false,
-      },
-      {
-        idx: 7,
-        name: "최길자",
-        birthDate: "1923-03-26",
-        location: "안양1동",
-        amount: 1,
-        receivedDate: null,
-        state: false,
-      },
-    ],
+    tdItems: [],
   }),
-
+  created(){
+    this.getAllBill();
+  },
   methods: {
     // 수령 상태 출력 변환
-    isReceived: function(val) {
-      if (val === true) return "수령완료";
-      return "수령 전";
+    isReceived: function (val) {
+      if (val == null || val== undefined) return "수령 전";
+      return "수령완료";
     },
     //수령날짜 출력 변환
-    receivedDate: function(val) {
-      if (val === null) return "수령 전";
+    receivedDate: function (val) {
+      if (val == null) return "수령 전";
       return val;
     },
-    //다이얼로그 열기
-    openDialog() {
-      this.dialog = true;
+    //사인 다이얼로그 열기
+    openSignDialog(item) {
+      this.selectedItem= item;
+      this.selectedDialog=SignDialog;
+      this.signDialog = true;
+      this.dialog = this.signDialog;
     },
-    //다이얼로그 닫기
-    closeDialog() {
-      this.dialog = false;
-      this.clearCanvas();
+    
+    //사인확인 다이얼로그 열기
+    openImgDialog(item) {
+      this.selectedItem= item;
+      this.selectedDialog=ImgDialog;
+      this.signDialog = true;
+      this.dialog = this.signDialog;
+    },
+     //사인 다이얼로그 닫기
+    closeSignDialog() {
+      this.signDialog = false;
+      this.selectedDialog=null;
+      this.dialog = this.signDialog;
+    },
+    //사인확인 다이얼로그 닫기
+    closeImgDialog() {
+      this.imgDialog = false;
+      this.selectedDialog=null;
+      this.dialog = this.imgDialog;
     },
 
-    clearCanvas() {
-      this.$refs.signaturePad.clearSignature();
+    //열린 다이얼로그에 따라 다이얼로그 닫기 함수 선택 제공
+    closeDialog() {
+      this.selectedItem= {};
+      if(this.signDialog) return this.closeSignDialog();
+      if(this.imgDialog) return this.closeImgDialog();
     },
-    save() {
-      const { isEmpty, data } = this.$refs.signaturePad.saveSignature();
-      console.log(isEmpty);
-      console.log(data);
+    
+    
+    //모든 bill데이터 받아오기
+    getAllBill(){
+      billApi.getBillAll()
+      .then(res=>{
+        this.tdItems = res.data;
+      })
+      .catch(err=>{
+        console.log(err);
+      })
+    },
+    onTitleInput: function(e) {
+      this.formTitle = e.target.innerHTML;
     },
     print() {
       const d = new Printd();
@@ -256,14 +207,43 @@ export default {
   width: 100%;
   max-width: 1200px;
 }
-.canvas-color {
-  background-color: lightgray;
-  border: 1px solid black;
+
+.loaded-table {
+  margin-top: 16px;
+}
+.loaded-table-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.loaded-table-title-area {
+  width: fit-content;
+  padding-bottom: 8px;
+  border-bottom: 3px solid skyblue;
+}
+.loaded-table-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-title-text {
+  width:fit-content;
+  font-size: 24px;
+  font-weight: bold;
+}
+.title-input{
+  min-width: 10px;
+}
+.title-icon {
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 .print-visible {
   display: none;
 }
+
 
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
