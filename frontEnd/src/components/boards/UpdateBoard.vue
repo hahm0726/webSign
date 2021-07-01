@@ -2,7 +2,6 @@
   <v-card>
     <header id="dialog-header">
       <div class="dialog-header-wrap">
-        
         <v-spacer></v-spacer>
         <v-btn id="close-btn" icon @click="closeUpdateDialog">
           <v-icon>mdi-close</v-icon>
@@ -21,7 +20,10 @@
       >
         <template v-slot:top>
           <v-dialog v-model="signatureDialog" max-width="500px">
-            <img-dialog @closeDialog="closeSignatureDialog" :item="selectedItem"></img-dialog>
+            <img-dialog
+              @closeDialog="closeSignatureDialog"
+              :item="selectedItem"
+            ></img-dialog>
           </v-dialog>
           <div class="loaded-table-top">
             <div class="loaded-table-title-area">
@@ -33,10 +35,10 @@
               </div>
             </div>
             <div class="btn-group">
-                <v-btn id="table-add-btn" color="success">
-                    <span class="btn-text">데이터 추가</span>
-                    <v-icon class="icon-in-btn"> mdi-plus </v-icon>
-                </v-btn>
+              <v-btn id="table-add-btn" color="success" @click="addData">
+                <span class="btn-text">데이터 추가</span>
+                <v-icon class="icon-in-btn"> mdi-plus </v-icon>
+              </v-btn>
               <v-btn
                 id="table-clear-btn"
                 color="error"
@@ -60,44 +62,67 @@
           </div>
         </template>
 
-        <template v-slot:[`item.idx`]="{item}">
-          <input :id="item.idx + '_idx'"
-                 class="input-idx"
-                 type="number"
-                 :value="item.idx"
-                 placeholder="입력 필수(중복X)"
-                 @input="updateIdx($event,item)">
+        <template v-slot:[`item.idx`]="{ item }">
+          <input
+            :id="item.idx + '_idx'"
+            class="input-idx"
+            type="number"
+            :value="item.idx"
+            placeholder="입력 필수(중복X)"
+            @input="updateIdx($event, item)"
+          />
         </template>
-        <template v-slot:[`item.name`]="{item}">
-          <input :id="item.idx + '_name'" type="text" :value="item.name" @input="updateName($event,item)">
+        <template v-slot:[`item.name`]="{ item }">
+          <input
+            :id="item.idx + '_name'"
+            type="text"
+            :value="item.name"
+            @input="updateName($event, item)"
+          />
         </template>
-        <template v-slot:[`item.birthDate`]="{item}">
-          <input :id="item.idx + 'birthDate'"
-                 type="text" :value="item.birthDate" 
-                 placeholder="yyyy-mm-dd"
-                 @input="updateBirthDate($event,item)">
+        <template v-slot:[`item.birthDate`]="{ item }">
+          <input
+            :id="item.idx + 'birthDate'"
+            type="text"
+            :value="item.birthDate"
+            placeholder="yyyy-mm-dd"
+            @input="updateBirthDate($event, item)"
+          />
         </template>
-        <template v-slot:[`item.location`]="{item}">
-          <input :id="item.idx + '_location'" type="text" :value="item.location" @input="updateLocation($event,item)">
+        <template v-slot:[`item.location`]="{ item }">
+          <input
+            :id="item.idx + '_location'"
+            type="text"
+            :value="item.location"
+            @input="updateLocation($event, item)"
+          />
         </template>
-        <template v-slot:[`item.amount`]="{item}">
-          <input :id="item.idx + '_amount'" type="number" :value="item.amount" @input="updateAmount($event,item)">
+        <template v-slot:[`item.amount`]="{ item }">
+          <input
+            :id="item.idx + '_amount'"
+            type="number"
+            :value="item.amount"
+            @input="updateAmount($event, item)"
+          />
         </template>
         <template v-slot:[`item.receivedDate`]="{ item }">
-          <input :id="item.idx + '_receivedDate'" 
-                 type="text" 
-                 :value="item.receivedDate"
-                 placeholder="yyyy-mm-dd"
-                 @input="updateReceivedDate($event,item)"
-          >
+          <input
+            :id="item.idx + '_receivedDate'"
+            type="text"
+            :value="item.receivedDate"
+            placeholder="yyyy-mm-dd"
+            @input="updateReceivedDate($event, item)"
+          />
         </template>
         <template v-slot:[`item.signature`]="{ item }">
-            <v-icon disabled v-if="item.signature == undefined">mdi-file-cancel-outline</v-icon>
-            <v-icon v-else @click="openSignatureDialog(item)">
-                mdi-text-box-search-outline
-            </v-icon>
+          <v-icon disabled v-if="item.signature == undefined"
+            >mdi-file-cancel-outline</v-icon
+          >
+          <v-icon v-else @click="openSignatureDialog(item)">
+            mdi-text-box-search-outline
+          </v-icon>
         </template>
-        <template v-slot:[`item.delete`]="{item}">
+        <template v-slot:[`item.delete`]="{ item }">
           <v-icon @click="deleteItem(item)">
             mdi-delete
           </v-icon>
@@ -108,16 +133,16 @@
 </template>
 
 <script>
-import * as billApi from "/src/api/billApi"
-import ImgDialog from "/src/components/dialog/ImgDialog"
+import * as billApi from "/src/api/billApi";
+import ImgDialog from "/src/components/dialog/ImgDialog";
 
 export default {
-  components:{
+  components: {
     ImgDialog,
   },
   data: () => ({
-    headerOption:{
-        "sort-icon":null,
+    headerOption: {
+      "sort-icon": null,
     },
     noDataText: "아직 불러온 데이터가 없습니다",
     thItems: [
@@ -131,22 +156,27 @@ export default {
       },
       { text: "거주동", value: "location", sortable: true, align: "center" },
       { text: "수량", value: "amount", sortable: false, align: "center" },
-      { text: "수령일", value: "receivedDate", sortable: false, align: "center" },
+      {
+        text: "수령일",
+        value: "receivedDate",
+        sortable: false,
+        align: "center",
+      },
       { text: "서명", value: "signature", sortable: false, align: "center" },
-      { text:"삭제", value: "delete", sortable:false, align: "center" },
+      { text: "삭제", value: "delete", sortable: false, align: "center" },
     ],
-    totalData:[],
-    toDeleteData:[],
+    totalData: [],
+    toDeleteData: [],
     toUpdateData: new Set(),
-    signatureDialog:false,
-    selectedItem:{},
+    signatureDialog: false,
+    selectedItem: {},
   }),
-  created(){
+  created() {
     this.getAllBill();
   },
-  computed:{
+  computed: {
     //수령날짜 출력 변환
-    showReceivedDate: function (val) {
+    showReceivedDate: function(val) {
       if (val == null) return "수령 전";
       return val;
     },
@@ -158,97 +188,107 @@ export default {
     },
     //임시 데이터(삭제할 데이터, 업데이트할 데이터)를 빈값으로 초기화
     initTempData() {
-      this.toDeleteData=[];
-      this.toUpdateData= new Set();
+      this.toDeleteData = [];
+      this.toUpdateData = new Set();
     },
 
     //읽은 엑셀데이터 테이블 비우기
-    recoveryAllData() {  
-        this.getAllBill();
-        this.initTempData();
-       
+    recoveryAllData() {
+      this.getAllBill();
+      this.initTempData();
     },
     //수령날짜 출력 변환
-    receivedDate: function (val) {
+    receivedDate: function(val) {
       if (val == null) return "수령 전";
       return val;
     },
 
     //해당 데이터 행 삭제. 백엔드의 쉬운 처리를 위해 toDeleteData에 idx에 담기
-    deleteItem(item){
-      const toDeleteItemIndex = this.totalData.indexOf(item)
-      this.totalData.splice(toDeleteItemIndex, 1)
+    deleteItem(item) {
+      const toDeleteItemIndex = this.totalData.indexOf(item);
+      this.totalData.splice(toDeleteItemIndex, 1);
       this.toDeleteData.push(item.idx);
     },
     //모든 bill데이터 받아오기
-    getAllBill(){
-      billApi.getBillAll()
-      .then(res=>{
-        this.totalData = res.data;
-      })
-      .catch(err=>{
-        console.log(err);
-      })
+    getAllBill() {
+      billApi
+        .getBillAll()
+        .then((res) => {
+          this.totalData = res.data;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     //서명 확인을 위한 서명 다이얼로그 열기
-    openSignatureDialog(item){
-        this.selectedItem=item;
-        this.signatureDialog=true;
+    openSignatureDialog(item) {
+      this.selectedItem = item;
+      this.signatureDialog = true;
     },
     //서명 확인을 위한 서명 다이얼로그 닫기
-    closeSignatureDialog(){
-      this.selectedItem={};
-      this.signatureDialog=false;
+    closeSignatureDialog() {
+      this.selectedItem = {};
+      this.signatureDialog = false;
     },
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
-    updateDb(){
-      const updateDataArr = [... this.toUpdateData];
-      billApi.updateBillList(updateDataArr)
-      .then(res => {console.log(res)})
-      .catch(err => {console.log(err)});
+    updateDb() {
+      const updateDataArr = [...this.toUpdateData];
+      billApi
+        .updateBillList(updateDataArr)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
 
-      billApi.deleteBillList(this.toDeleteData)
-      .then(res => {console.log(res)})
-      .catch(err => {console.log(err)});
+      billApi
+        .deleteBillList(this.toDeleteData)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
 
       this.getAllBill();
       this.initTempData();
     },
     //연번 데이터 수정 input handler
-    updateIdx(event,item){
-        item.idx = event.target.value;
-        this.toUpdateData.add(item);
+    updateIdx(event, item) {
+      item.idx = event.target.value;
+      this.toUpdateData.add(item);
     },
     //이름 데이터 수정 input handler
-    updateName(event,item){
-        item.name = event.target.value;
-        this.toUpdateData.add(item);
+    updateName(event, item) {
+      item.name = event.target.value;
+      this.toUpdateData.add(item);
     },
     //생년월일 데이터 수정 input handler
-    updateBirthDate(event,item){
-        item.birthDate = event.target.value;
-        this.toUpdateData.add(item);
+    updateBirthDate(event, item) {
+      item.birthDate = event.target.value;
+      this.toUpdateData.add(item);
     },
     //거주동 데이터 수정 input handler
-    updateLocation(event,item){
-        item.location = event.target.value;
-        this.toUpdateData.add(item);
+    updateLocation(event, item) {
+      item.location = event.target.value;
+      this.toUpdateData.add(item);
     },
     //수량 데이터 수정 input handler
-    updateAmount(event,item){
-        item.amount = event.target.value;
-        this.toUpdateData.add(item);
+    updateAmount(event, item) {
+      item.amount = event.target.value;
+      this.toUpdateData.add(item);
     },
     //수령일 데이터 수정 input handler
-    updateReceivedDate(event,item){
-        item.receivedDate = event.target.value;
-        this.toUpdateData.add(item);
+    updateReceivedDate(event, item) {
+      item.receivedDate = event.target.value;
+      this.toUpdateData.add(item);
     },
     //데이터 한 행 추가
-    addData(){
+    addData() {
       let newData = new Object();
       this.totalData.unshift(newData);
-    }
+    },
   },
 };
 </script>
@@ -295,7 +335,7 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-#table-add-btn{
+#table-add-btn {
   margin-right: 8px;
   text-align: center;
 }
@@ -336,23 +376,22 @@ export default {
   display: none;
 }
 
-.loaded-table input{
+.loaded-table input {
   text-align: center;
 }
-.loaded-table input[type="text"]{
-  width:100%;
-  
+.loaded-table input[type="text"] {
+  width: 100%;
 }
-.loaded-table input[type="number"]{
-  width:30%;
+.loaded-table input[type="number"] {
+  width: 30%;
 }
-.input-idx{
-  width:80% !important;
+.input-idx {
+  width: 80% !important;
 }
 .loaded-table input[type="number"]::-webkit-outer-spin-button,
 .loaded-table input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -395,8 +434,8 @@ export default {
   }
 }
 
-.before-sign{
-  font-size:1px;
+.before-sign {
+  font-size: 1px;
 }
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
