@@ -23,3 +23,12 @@ pnpm-debug.log*
 *.sw?
 
 package-lock.json
+
+# venv 파일 
+backend/
+bin/
+include/
+lib/
+share/
+src/
+pyvenv.cfg
