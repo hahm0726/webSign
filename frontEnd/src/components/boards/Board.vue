@@ -11,6 +11,7 @@
       <v-dialog v-model="dialog" persistent max-width="500px">
         <component :is="selectedDialog" @closeDialog="closeDialog" @reRender="getAllBill" :item="selectedItem"></component>
       </v-dialog>
+      <print v-bind:print_data="tdItems" class="print-visible"></print>
       <div class="loaded-table-top">
         <div class="loaded-table-title-area">
           <div class="loaded-table-title table-title-text">
@@ -20,6 +21,7 @@
             </v-icon>
           </div>
         </div>
+        <v-btn @click="print">인쇄</v-btn>
       </div>
     </template>
     <template v-slot:[`item.receivedDate`]="{ item }">
@@ -42,6 +44,8 @@
 </template>
 
 <script>
+import { Printd } from "printd";
+import Print from "@/components/form/Print";
 import SignDialog from "/src/components/dialog/SignDialog"
 import ImgDialog from "/src/components/dialog/ImgDialog"
 import * as billApi from "/src/api/billApi"
@@ -49,6 +53,7 @@ import * as billApi from "/src/api/billApi"
 
 export default {
   components: { 
+    Print,
     SignDialog,
     ImgDialog,
   },
@@ -130,7 +135,6 @@ export default {
       if(this.imgDialog) return this.closeImgDialog();
     },
     
-    
     //모든 bill데이터 받아오기
     getAllBill(){
       billApi.getBillAll()
@@ -143,6 +147,55 @@ export default {
     },
     onTitleInput: function(e) {
       this.formTitle = e.target.innerHTML;
+    },
+    print() {
+      const d = new Printd();
+      const css = `/* 테이블 전체 디자인 */
+                    #print-form {
+                      width: 100%;
+                      height: 100%;
+                      text-align: center;
+                      font-size: 15pt;
+                    }
+                    /* 헤드 첫줄 제목 디자인 */
+                    #print-form thead > tr:nth-child(1) {
+                      font-size: 25pt;
+                    }
+                    /* 테이블 헤드의 th 디자인 */
+                    #print-form thead th {
+                      padding-top: 10px;
+                      padding-bottom: 10px;
+                    }
+
+                    /* 테이블 바디 여백 */
+                    #print-form tbody td {
+                      height: 80px;
+                    }
+
+                    /* 테이블 테두리 한줄 설정 */
+                    #print-form,
+                    td,
+                    th {
+                      border: 1px solid black;
+                      border-collapse: collapse;
+                    }
+
+                    /* A4 사이즈 설정 */
+                    @page a4sheet {
+                      size: 21cm 29.7cm;
+                    }
+                    .a4 {
+                      page: a4sheet;
+                      page-break-after: always;
+                    }
+
+                    .print-area {
+                      display: flex;
+                      align-items: center;
+                    }`;
+
+      const print_sheet = document.querySelector(".print-area");
+      d.print(print_sheet, [css]);
     },
   },
 };
@@ -186,6 +239,11 @@ export default {
   padding-right: 15px;
 }
 
+.print-visible {
+  display: none;
+}
+
+
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
   .v-data-table::v-deep th {
@@ -208,6 +266,12 @@ export default {
   .v-data-table::v-deep td {
     font-size: 1px !important;
     padding: 1px !important;
+  }
+}
+
+@media print {
+  .print-visible {
+    display: initial;
   }
 }
 </style>
