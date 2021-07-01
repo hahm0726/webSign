@@ -36,4 +36,16 @@
       <li>f_backEnd_Bill - Bill(인수증) CRUD API 구현</li>
     </ul>
   </li>
+   <li>
+    2021-06-30
+    <ul>
+      <li>f_frontEnd_ExcelAxios - 프론트엔드 CRUD 구현 / 수정과 삭제 미완료</li>
+    </ul>
+  </li>
+   <li>
+    2021-07-01
+    <ul>
+      <li>f_frontEnd_signature - 프론트엔드 사인 axios 저장/삭제 구현 완료</li>
+    </ul>
+  </li>
   </ul>
