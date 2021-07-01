@@ -22,7 +22,6 @@
         :headers="thItems"
         :items="excelData"
         hide-default-footer
-        :items-per-page="itemsPerPage"
       >
         <template v-slot:top>
           <div class="loaded-table-top">
@@ -103,7 +102,6 @@ export default {
       { text: "수량", value: "amount", sortable: false, align: "center" },
       {text:"작업", value: "action", sortable:false, align: "center"},
     ],
-    itemsPerPage: 10,
     excelData: [],
   }),
   
@@ -170,7 +168,6 @@ export default {
     saveExcelData(){
       billApi.createBillList(this.excelData)
       .then(()=>{
-        this.$emit("excelDataSaved");
       })
       .catch(err=>{
         console.log(err);

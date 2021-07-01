@@ -20,19 +20,9 @@
         :header-props="headerOption"
       >
         <template v-slot:top>
-            <v-dialog v-model="signatureDialog" max-width="500px">
-        <v-card class="pa-2">
-          <v-card-actions class="pa-0">
-            <v-spacer></v-spacer>
-            <v-btn small @click="closeSignatureDialog">
-              닫기
-            </v-btn>
-            <v-btn color="error" small>
-              서명삭제
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+          <v-dialog v-model="signatureDialog" max-width="500px">
+            <img-dialog @closeDialog="closeSignatureDialog" :item="selectedItem"></img-dialog>
+          </v-dialog>
           <div class="loaded-table-top">
             <div class="loaded-table-title-area">
               <div class="loaded-table-title table-title-text">
@@ -50,6 +40,7 @@
               <v-btn
                 id="table-clear-btn"
                 color="error"
+                :disabled="toUpdateData.size == 0 && toDeleteData.length == 0"
                 @click="recoveryAllData"
               >
                 <span class="btn-text">데이터 되돌리기</span>
@@ -59,6 +50,7 @@
                 id="save-to-db-btn"
                 class="white--text"
                 color="primary"
+                :disabled="toUpdateData.size == 0 && toDeleteData.length == 0"
                 @click="updateDb"
               >
                 <span class="btn-text"> 수정 완료</span>
@@ -100,7 +92,8 @@
           >
         </template>
         <template v-slot:[`item.signature`]="{ item }">
-            <v-icon v-if="item" @click="openSignatureDialog(item.signature)">
+            <v-icon disabled v-if="item.signature == undefined">mdi-file-cancel-outline</v-icon>
+            <v-icon v-else @click="openSignatureDialog(item)">
                 mdi-text-box-search-outline
             </v-icon>
         </template>
@@ -116,8 +109,12 @@
 
 <script>
 import * as billApi from "/src/api/billApi"
+import ImgDialog from "/src/components/dialog/ImgDialog"
 
 export default {
+  components:{
+    ImgDialog,
+  },
   data: () => ({
     headerOption:{
         "sort-icon":null,
@@ -142,6 +139,7 @@ export default {
     toDeleteData:[],
     toUpdateData: new Set(),
     signatureDialog:false,
+    selectedItem:{},
   }),
   created(){
     this.getAllBill();
@@ -160,8 +158,8 @@ export default {
     },
     //임시 데이터(삭제할 데이터, 업데이트할 데이터)를 빈값으로 초기화
     initTempData() {
-        this.toDeleteData=[];
-        this.toUpdateData= new Set();
+      this.toDeleteData=[];
+      this.toUpdateData= new Set();
     },
 
     //읽은 엑셀데이터 테이블 비우기
@@ -193,30 +191,28 @@ export default {
       })
     },
     //서명 확인을 위한 서명 다이얼로그 열기
-    openSignatureDialog(){
+    openSignatureDialog(item){
+        this.selectedItem=item;
         this.signatureDialog=true;
     },
     //서명 확인을 위한 서명 다이얼로그 닫기
     closeSignatureDialog(){
-        this.signatureDialog=false;
-    },
-    //서명 확인을 위한 서명 다이얼로그 닫기
-    deleteSignatureDialog(){
-        this.signatureDialog=null;
+      this.selectedItem={};
+      this.signatureDialog=false;
     },
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
     updateDb(){
-        const updateDataArr = [... this.toUpdateData];
-        billApi.updateBillList(updateDataArr)
-        .then(res => {console.log(res)})
-        .catch(err => {console.log(err)});
+      const updateDataArr = [... this.toUpdateData];
+      billApi.updateBillList(updateDataArr)
+      .then(res => {console.log(res)})
+      .catch(err => {console.log(err)});
 
-        billApi.deleteBillList(this.toDeleteData)
-        .then(res => {console.log(res)})
-        .catch(err => {console.log(err)});
+      billApi.deleteBillList(this.toDeleteData)
+      .then(res => {console.log(res)})
+      .catch(err => {console.log(err)});
 
-        this.getAllBill();
-        this.initTempData();
+      this.getAllBill();
+      this.initTempData();
     },
     //연번 데이터 수정 input handler
     updateIdx(event,item){
@@ -248,8 +244,10 @@ export default {
         item.receivedDate = event.target.value;
         this.toUpdateData.add(item);
     },
+    //데이터 한 행 추가
     addData(){
-        this.totalData.unshift({});
+      let newData = new Object();
+      this.totalData.unshift(newData);
     }
   },
 };
@@ -346,7 +344,7 @@ export default {
   
 }
 .loaded-table input[type="number"]{
-  width:50%;
+  width:30%;
 }
 .input-idx{
   width:80% !important;
@@ -355,10 +353,6 @@ export default {
 .loaded-table input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
-
-table.dataTable thead .sorting_asc i{
-    display: none !important;
 }
 
 @media screen and (max-width: 600px) {
@@ -399,6 +393,10 @@ table.dataTable thead .sorting_asc i{
     font-size: 16px;
     font-style: bold;
   }
+}
+
+.before-sign{
+  font-size:1px;
 }
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
