@@ -1,17 +1,18 @@
 <template>
   <v-data-table
+    v-model="toPrintItems"
     mobile-breakpoint="0"
     class="tables loaded-table"
     :headers="thItems"
     :items="tdItems"
-    hide-default-footer
+    show-select
+    item-key="idx"
   >
     <template v-slot:top>
-      
       <v-dialog v-model="dialog" persistent max-width="500px">
         <component :is="selectedDialog" @closeDialog="closeDialog" @reRender="getAllBill" :item="selectedItem"></component>
       </v-dialog>
-      <print v-bind:print_data="tdItems" class="print-visible"></print>
+      <print :formTitle="formTitle" :printData="toPrintItems" class="print-visible"></print>
       <div class="loaded-table-top">
         <div class="loaded-table-title-area">
           <div class="loaded-table-title table-title-text">
@@ -58,12 +59,14 @@ export default {
     ImgDialog,
   },
   data: () => ({
+
     formTitle:"인수증",
     dialog:false,
     signDialog:false,
     imgDialog:false,
     selectedDialog:null,
     selectedItem: {},
+    toPrintItems:[],
     thItems: [
       { text: "연번", value: "idx", sortable: false, align: "center" },
       { text: "이름", value: "name", sortable: false, align: "center" },
@@ -149,6 +152,7 @@ export default {
       this.formTitle = e.target.innerHTML;
     },
     print() {
+      console.log(this.toPrintItems);
       const d = new Printd();
       const css = `/* 테이블 전체 디자인 */
                     #print-form {
@@ -180,6 +184,10 @@ export default {
                       border-collapse: collapse;
                     }
 
+                    .sign-img{
+                      width:90px;
+                      height:50px;
+                    }
                     /* A4 사이즈 설정 */
                     @page a4sheet {
                       size: 21cm 29.7cm;

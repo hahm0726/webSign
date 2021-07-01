@@ -3,7 +3,7 @@
     <table id="print-form">
       <thead>
         <tr>
-          <th colspan="6">노인맞춤돌봄서비스 후원물품 인수증</th>
+          <th colspan="6">{{formTitle}}</th>
         </tr>
         <tr>
           <th colspan="2">후원처</th>
@@ -23,21 +23,23 @@
       <tbody>
         <!-- 단일 반복문 이용한 출력 -->
         <tr v-for="i in 10" :key="i">
-          <td v-if="i <= print_data_len">
-            {{ print_data[i - 1].idx }}
+          <td v-if="i <= printDataLen">
+            {{ printData[i - 1].idx }}
           </td>
           <td v-else></td>
-          <td v-if="i <= print_data_len">
-            {{ print_data[i - 1].receivedDate }}
+          <td v-if="i <= printDataLen">
+            {{ printData[i - 1].receivedDate }}
           </td>
           <td v-else></td>
-          <td v-if="i <= print_data_len">{{ print_data[i - 1].name }}</td>
+          <td v-if="i <= printDataLen">{{ printData[i - 1].name }}</td>
           <td v-else></td>
-          <td v-if="i <= print_data_len">{{ print_data[i - 1].birthDate }}</td>
+          <td v-if="i <= printDataLen">{{ printData[i - 1].birthDate }}</td>
           <td v-else></td>
-          <td v-if="i <= print_data_len">{{ print_data[i - 1].amount }}</td>
+          <td v-if="i <= printDataLen">{{ printData[i - 1].amount }}</td>
           <td v-else></td>
-          <td v-if="i <= print_data_len"></td>
+          <td v-if="i <= printDataLen">
+            <img v-if="printData[i - 1].signature !== null" class="sign-img" :src="printData[i - 1].signature">
+          </td>
           <td v-else></td>
         </tr>
       </tbody>
@@ -47,14 +49,16 @@
 
 <script>
 export default {
-  props: ["print_data"],
-  created() {
-    this.print_data_len = this.print_data.length;
-    console.log(this.print_data_len);
+  props: {
+    formTitle:String,
+    printData:Array
   },
-  data: () => ({
-    print_data_len: "",
-  }),
+  computed: {
+    printDataLen() {
+      if(this.printData == undefined) return 0;
+      return this.printData.length;
+    },
+  }
 };
 </script>
 
@@ -88,7 +92,6 @@ th {
   border: 1px solid black;
   border-collapse: collapse;
 }
-
 /* A4 사이즈 설정 */
 @page a4sheet {
   size: 21cm 29.7cm;
