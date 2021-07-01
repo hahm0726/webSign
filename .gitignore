@@ -35,12 +35,3 @@ db.sqlite3-journal
 media
 migrations/
 migrations/!__init__
-
-# venv 파일 
-backend/
-bin/
-include/
-lib/
-share/
-src/
-pyvenv.cfg

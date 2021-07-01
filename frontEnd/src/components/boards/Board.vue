@@ -7,6 +7,9 @@
     :items="tdItems"
     show-select
     item-key="idx"
+    :footer-props="{itemsPerPage: 10,
+                    'items-per-page-options':[10]
+                  }"
   >
     <template v-slot:top>
       <v-dialog v-model="dialog" persistent max-width="500px">
@@ -22,7 +25,12 @@
             </v-icon>
           </div>
         </div>
-        <v-btn @click="print">인쇄</v-btn>
+        <v-btn :disabled="toPrintItems.length==0" id="print-btn" @click="print" elevation="0">
+          인쇄
+          <v-icon class="icon-in-btn">
+            mdi-printer
+          </v-icon>
+        </v-btn>
       </div>
     </template>
     <template v-slot:[`item.receivedDate`]="{ item }">
@@ -148,6 +156,7 @@ export default {
         console.log(err);
       })
     },
+    //타이틀 바뀌는 것 감지
     onTitleInput: function(e) {
       this.formTitle = e.target.innerHTML;
     },
@@ -159,12 +168,9 @@ export default {
                       width: 100%;
                       height: 100%;
                       text-align: center;
-                      font-size: 15pt;
+                      font-size: 10pt;
                     }
-                    /* 헤드 첫줄 제목 디자인 */
-                    #print-form thead > tr:nth-child(1) {
-                      font-size: 25pt;
-                    }
+                    
                     /* 테이블 헤드의 th 디자인 */
                     #print-form thead th {
                       padding-top: 10px;
@@ -185,8 +191,25 @@ export default {
                     }
 
                     .sign-img{
-                      width:90px;
+                      width:150px;
                       height:50px;
+                    }
+                    @media print {
+                      .print-visible {
+                        display: initial;
+                      }
+                      /* 헤드 첫줄 제목 디자인 */
+                      #print-form thead > tr:nth-child(1) {
+                        font-size: 24pt;
+                      }
+                      #print-form thead > tr:nth-child(2),
+                      #print-form thead > tr:nth-child(3) {
+                        font-size: 12pt;
+                      }
+                      #print-form tbody tr td:nth-child(2),
+                      #print-form tbody tr td:nth-child(4){
+                        width:150px;
+                      }
                     }
                     /* A4 사이즈 설정 */
                     @page a4sheet {
@@ -251,6 +274,15 @@ export default {
   display: none;
 }
 
+#print-btn{
+  background-color: white;
+  border: 1px solid;
+  text-align: center;
+}
+
+.icon-in-btn {
+  margin-left: 4px;
+}
 
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
@@ -274,12 +306,6 @@ export default {
   .v-data-table::v-deep td {
     font-size: 1px !important;
     padding: 1px !important;
-  }
-}
-
-@media print {
-  .print-visible {
-    display: initial;
   }
 }
 </style>
