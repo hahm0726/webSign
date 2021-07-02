@@ -15,8 +15,10 @@
         :no-data-text="noDataText"
         :headers="thItems"
         :items="totalData"
-        hide-default-footer
         :header-props="headerOption"
+        :footer-props="{itemsPerPage: 10,
+                    'items-per-page-options':[10]
+                  }"
       >
         <template v-slot:top>
           <v-dialog v-model="signatureDialog" max-width="500px">
@@ -42,7 +44,7 @@
               <v-btn
                 id="table-clear-btn"
                 color="error"
-                :disabled="toUpdateData.size == 0 && toDeleteData.length == 0"
+                :disabled="btnActivate"
                 @click="recoveryAllData"
               >
                 <span class="btn-text">데이터 되돌리기</span>
@@ -52,7 +54,7 @@
                 id="save-to-db-btn"
                 class="white--text"
                 color="primary"
-                :disabled="toUpdateData.size == 0 && toDeleteData.length == 0"
+                :disabled="btnActivate"
                 @click="updateDb"
               >
                 <span class="btn-text"> 수정 완료</span>
@@ -167,7 +169,9 @@ export default {
     ],
     totalData: [],
     toDeleteData: [],
-    toUpdateData: new Set(),
+    toUpdateData: [],
+    toCreateData: [],
+    toUpdateDataSet: new Set(),
     signatureDialog: false,
     selectedItem: {},
   }),
@@ -180,7 +184,16 @@ export default {
       if (val == null) return "수령 전";
       return val;
     },
+    btnActivate:function(){
+      
+      if(this.toUpdateData.length !==0) return false
+      if(this.toDeleteData.length !==0) return false
+      if(this.toCreateData.length !==0) return false
+
+      return true;
+    }
   },
+
   methods: {
     //다이얼로그 닫기 동작
     closeUpdateDialog() {
@@ -189,7 +202,9 @@ export default {
     //임시 데이터(삭제할 데이터, 업데이트할 데이터)를 빈값으로 초기화
     initTempData() {
       this.toDeleteData = [];
-      this.toUpdateData = new Set();
+      this.toUpdateData = [];
+      this.toCreateData = [];
+      this.toUpdateDataSet = new Set();
     },
 
     //읽은 엑셀데이터 테이블 비우기
@@ -206,8 +221,22 @@ export default {
     //해당 데이터 행 삭제. 백엔드의 쉬운 처리를 위해 toDeleteData에 idx에 담기
     deleteItem(item) {
       const toDeleteItemIndex = this.totalData.indexOf(item);
+      const toCreateItemIndex = this.toCreateData.indexOf(item);
+      const toUpdateItemIndex = this.toUpdateData.indexOf(item);
+      //새로 만든 아이템이 삭제되는 경우
+      if(toCreateItemIndex !== -1){
+        this.toCreateData.splice(toCreateItemIndex, 1);
+        this.toUpdateData.splice(toUpdateItemIndex, 1);
+      }
+      //기존에 존제하던 아이템 삭제
+      else{
+        //기존에 존재하던 아이템 중 업데이트 중 지운 경우
+        if(toUpdateItemIndex !== -1){
+          this.toUpdateData.splice(toUpdateItemIndex, 1);
+        }
+        this.toDeleteData.push(item.id);
+      }
       this.totalData.splice(toDeleteItemIndex, 1);
-      this.toDeleteData.push(item.idx);
     },
     //모든 bill데이터 받아오기
     getAllBill() {
@@ -230,9 +259,25 @@ export default {
       this.selectedItem = {};
       this.signatureDialog = false;
     },
+    //연번 유효성 검증
+    //1.빈 값 검사 2. 연번 중복
+    idxValidation(){
+      const idxInputs = document.getElementsByClassName("input-idx");
+      for (let i=0; i< idxInputs.length;i++){
+        if(idxInputs[i].value == ""){
+          idxInputs[i].classList.add("validation-err");
+          idxInputs[i].focus();
+          return false;
+        }
+        idxInputs[i].classList.remove("validation-err");
+      }
+      return true;
+    },
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
     updateDb() {
-      const updateDataArr = [...this.toUpdateData];
+      if(!this.idxValidation()){return;}
+      const updateDataArr = this.toUpdateData;
+      console.log(updateDataArr);
       billApi
         .updateBillList(updateDataArr)
         .then((res) => {
@@ -257,36 +302,55 @@ export default {
     //연번 데이터 수정 input handler
     updateIdx(event, item) {
       item.idx = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //이름 데이터 수정 input handler
     updateName(event, item) {
       item.name = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //생년월일 데이터 수정 input handler
     updateBirthDate(event, item) {
       item.birthDate = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //거주동 데이터 수정 input handler
     updateLocation(event, item) {
       item.location = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //수량 데이터 수정 input handler
     updateAmount(event, item) {
       item.amount = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //수령일 데이터 수정 input handler
     updateReceivedDate(event, item) {
       item.receivedDate = event.target.value;
-      this.toUpdateData.add(item);
+      const prevLen = this.toUpdateDataSet.size;
+      if(this.toUpdateDataSet.add(item).size !=prevLen){
+        this.toUpdateData.push(item);
+      }
     },
     //데이터 한 행 추가
     addData() {
-      let newData = new Object();
+      let newData = {id:null,};
+      this.toCreateData.push(newData);
       this.totalData.unshift(newData);
     },
   },
@@ -392,6 +456,9 @@ export default {
 .loaded-table input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.validation-err:focus{
+  outline:2px solid red;
 }
 
 @media screen and (max-width: 600px) {

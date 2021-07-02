@@ -140,6 +140,7 @@ export default {
           });
           for (var i = 0; i < rows.length; i++) {
             rows[i].amount=0;
+            rows[i].id=null;
             this.excelData.push(rows[i]);
           }
         });

@@ -58,7 +58,7 @@ export default {
 
         this.item.receivedDate= year+"-"+month+"-"+date;
 
-        billApi.updateBill(this.item.idx,this.item)
+        billApi.updateBill(this.item.id,this.item)
         .then(()=>{
           this.closeDialog();
           this.$emit('reRender');

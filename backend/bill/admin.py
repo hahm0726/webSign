@@ -4,6 +4,7 @@ from .models import Bill
 @admin.register(Bill)
 class BillAdmin(admin.ModelAdmin):
     list_display=(
+        "id",
         "idx",
         "name",
         "birthDate",

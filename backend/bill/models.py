@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Bill(models.Model):
-    idx = models.IntegerField(verbose_name="연번",primary_key=True, blank=False) #연번
+    idx = models.IntegerField(verbose_name="연번",unique=True) #연번
     name= models.CharField(verbose_name="이름",max_length=20, null=True) #이름
     birthDate = models.CharField(verbose_name="생년월일",max_length=10, null=True, blank=True) #생년월일(YYYY-MM-DD)
     location = models.CharField(verbose_name="거주동",max_length=20, null=True, blank=True) #거주동

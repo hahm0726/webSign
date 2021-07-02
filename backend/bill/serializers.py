@@ -6,23 +6,24 @@ class BillSerializer(serializers.ModelSerializer):
     """
     Bill 단일 객체에 대한 처리를 수행하는 serializer
     """
+
     class Meta:
         model = Bill
         fields = [
+            "id",
             "idx",
             "name",
             "birthDate",
             "location",
             "amount",
             "receivedDate",
-            "state",
             "signature"]
     
     def validate_name(self, name):
         """
         이름 유효성 검사
         """
-        if name == "":
+        if name == "" or name == None:
             name= None
 
         return name
@@ -34,7 +35,7 @@ class BillSerializer(serializers.ModelSerializer):
         2. 날짜 형식 검사
         """
 
-        if date == "":
+        if date == "" or date== None:
             date= None
             return date
 
@@ -49,7 +50,7 @@ class BillSerializer(serializers.ModelSerializer):
         """
         거주동 유효성 검사
         """
-        if location == "":
+        if location == "" or location == None:
             location= None
 
         return location
@@ -61,7 +62,7 @@ class BillSerializer(serializers.ModelSerializer):
         2. 날짜 형식 검사
         """
        
-        if date == "":
+        if date == "" or date== None:
             date = None
             return date
 
