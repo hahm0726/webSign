@@ -68,6 +68,7 @@
           <input :disabled="!item.hasOwnProperty('beforeSave')" class="password-input" type="password" :value="item.password" placeholder="(비밀번호 입력)"/>
         </template>
         <template v-slot:[`item.userType`]="{ item }">
+          <!--유저타입-->
           <select :disabled="!item.hasOwnProperty('beforeSave')" class="userType-select" v-model="item.userType">
             <option disabled value="">권한선택</option>
             <option value="1">관리자</option>
@@ -223,6 +224,7 @@ export default {
        if(confirm("해당 유저를 저장하시겠습니까?")){
         item.beforeSave=false;
         delete item.beforeSave; 
+        //axios create 코드
         this.callToast("사용자 생성 완료","success");
       }
     },
@@ -231,7 +233,10 @@ export default {
       if(confirm("해당 유저를 삭제하시겠습니까?")){
         const toDeleteItemIndex = this.totalUser.indexOf(item);
         this.totalUser.splice(toDeleteItemIndex, 1);
-        this.callToast("사용자 삭제 완료","success");
+        if(!Object.prototype.hasOwnProperty.call(item,"beforeSave")){
+          //axios delete 코드
+          this.callToast("사용자 삭제 완료","success");
+        }
       }
       
     },
@@ -267,11 +272,7 @@ export default {
   align-items: center;
   height: 60px;
 }
-#file-input {
-  border: 2px solid;
-  border-radius: 5px;
-  padding-left: 2px;
-}
+
 #close-btn {
   color: black;
   text-align: center;
@@ -300,14 +301,6 @@ export default {
   margin-right: 8px;
   text-align: center;
 }
-#table-clear-btn {
-  margin-right: 8px;
-  text-align: center;
-}
-#save-to-db-btn {
-  text-align: center;
-}
-
 .loaded-table-title-area {
   width: fit-content;
   padding-bottom: 8px;
@@ -364,13 +357,6 @@ export default {
 }
 
 @media screen and (max-width: 600px) {
-  #file-input {
-    border: 2px solid;
-    border-radius: 5px;
-    padding-left: 2px;
-    width: 180px;
-    font-size: 10px;
-  }
 
   .btn-group {
     display: flex;
@@ -381,16 +367,6 @@ export default {
   }
   .icon-in-btn {
     display: initial;
-  }
-  #table-clear-btn {
-    margin-right: 8px;
-    text-align: center;
-    width: fit-content;
-  }
-
-  #save-to-db-btn {
-    text-align: center;
-    width: fit-content;
   }
   .btn-group button.v-btn {
     min-width: 0;

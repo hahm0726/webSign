@@ -34,7 +34,7 @@
             <v-icon>mdi-magnify</v-icon>
             <input id="search-input" type="text" placeholder="검색" :value="search" @input="inputSearch($event)"/>
           </div>
-          </div>
+        </div>
         <v-btn :disabled="toPrintItems.length==0" id="print-btn" @click="print" elevation="0">
           인쇄
           <v-icon class="icon-in-btn">
@@ -115,7 +115,24 @@ export default {
   created(){
     this.getAllBill();
   },
+  mounted(){
+    const tablePrev = document.querySelector(".v-data-footer__icons-before").getElementsByTagName("button");
+    const tableNext = document.querySelector(".v-data-footer__icons-after").getElementsByTagName("button");
+    tablePrev[0].addEventListener("click",this.clearPrint);
+    tableNext[0].addEventListener("click",this.clearPrint);
+  },
+  watch:{
+    toPrintItems(){
+      if(this.toPrintItems.length>10){
+        alert("프린트 가능 개수는 최대 10개입니다.");
+        this.toPrintItems.pop();
+      }
+    },
+  },
   methods: {
+    clearPrint(){
+      this.toPrintItems=[];
+    },
     inputSearch(event){
       this.search=event.target.value;
     },
@@ -259,6 +276,7 @@ export default {
   outline: 1px solid black;
 }
 #search-input{
+  width:300px;
   padding-left: 4px;
 }
 
@@ -314,27 +332,34 @@ export default {
   margin-left: 4px;
   }
 
+.v-data-table::v-deep div.v-data-footer{
+  justify-content: center !important;
+}
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
+  #search-input{
+    font-size: 12px;
+    width:150px;
+  }
   .v-data-table::v-deep th {
-    font-size: 2px !important;
+    font-size: 16px !important;
     text-align: center;
     padding: 1px !important;
   }
   .v-data-table::v-deep td {
-    font-size: 1px !important;
+    font-size: 12px !important;
     padding: 1px !important;
   }
 }
 /*제일 작은 모바일 사이즈(가로) */
 @media screen and (min-width: 465px) and (max-width: 600px) {
   .v-data-table::v-deep th {
-    font-size: 2px !important;
+    font-size: 16px !important;
     text-align: center;
     padding: 1px !important;
   }
   .v-data-table::v-deep td {
-    font-size: 1px !important;
+    font-size: 12px !important;
     padding: 1px !important;
   }
 }

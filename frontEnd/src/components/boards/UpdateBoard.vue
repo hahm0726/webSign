@@ -324,10 +324,10 @@ export default {
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
     updateDb() {
       if(!this.idxValidation()){return;} 
-      
       if(this.toUpdateData.length != 0){
+        console.log(this.toUpdateData);
         billApi
-          .updateBillList( this.toUpdateData)
+          .updateBillList(this.toUpdateData)
           .then(() => {
             this.getAllBill();
             this.callToast("수정완료","success");
@@ -574,6 +574,9 @@ export default {
   border-radius: 2px;
 }
 
+.v-data-table::v-deep div.v-data-footer{
+  justify-content: center !important;
+}
 @media screen and (max-width: 600px) {
   #file-input {
     border: 2px solid;
