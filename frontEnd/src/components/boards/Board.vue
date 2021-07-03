@@ -7,6 +7,10 @@
     :items="tdItems"
     show-select
     item-key="idx"
+    :search="search"
+    :header-props="headerOption"
+    no-data-text="데이터가 없습니다"
+    no-results-text="일치하는 검색 결과가 없습니다"
     :footer-props="{itemsPerPage: 10,
                     'items-per-page-options':[10]
                   }"
@@ -17,14 +21,20 @@
       </v-dialog>
       <print :formTitle="formTitle" :printData="toPrintItems" class="print-visible"></print>
       <div class="loaded-table-top">
-        <div class="loaded-table-title-area">
-          <div class="loaded-table-title table-title-text">
-            <span class="title-input" role="textbox" @input="onTitleInput($event)" contenteditable>{{formTitle}}</span>
-            <v-icon class="title-icon" color="black">
-                  mdi-file-document-outline
-            </v-icon>
+        <div class="title-search-area">
+          <div class="title-area">
+            <div class="loaded-table-title table-title-text">
+              <span class="title-input" role="textbox" @input="onTitleInput($event)" contenteditable>{{formTitle}}</span>
+              <v-icon class="title-icon" color="black">
+                    mdi-file-document-outline
+              </v-icon>
+            </div>
           </div>
-        </div>
+          <div class="search-area">
+            <v-icon>mdi-magnify</v-icon>
+            <input id="search-input" type="text" placeholder="검색" :value="search" @input="inputSearch($event)"/>
+          </div>
+          </div>
         <v-btn :disabled="toPrintItems.length==0" id="print-btn" @click="print" elevation="0">
           인쇄
           <v-icon class="icon-in-btn">
@@ -67,7 +77,10 @@ export default {
     ImgDialog,
   },
   data: () => ({
-
+    headerOption: {
+      "sort-icon": null,
+    },
+    search:"",
     formTitle:"인수증",
     dialog:false,
     signDialog:false,
@@ -76,24 +89,26 @@ export default {
     selectedItem: {},
     toPrintItems:[],
     thItems: [
-      { text: "연번", value: "idx", sortable: false, align: "center" },
-      { text: "이름", value: "name", sortable: false, align: "center" },
+      { text: "연번", value: "idx", sortable: true, filterable: false, align: "center" },
+      { text: "이름", value: "name", sortable: true, align: "center" },
       {
         text: "생년월일",
         value: "birthDate",
+        filterable: false,
         sortable: false,
         align: "center",
       },
-      { text: "거주동", value: "location", sortable: false, align: "center" },
-      { text: "수량", value: "amount", sortable: false, align: "center" },
+      { text: "거주동", value: "location", sortable: true, align: "center" },
+      { text: "수량", value: "amount", sortable: false, filterable: false, align: "center" },
       {
         text: "수령일",
         value: "receivedDate",
         sortable: false,
+        filterable: false,
         align: "center",
       },
-      { text: "수령상태", value: "state", sortable: false, align: "center" },
-      { text: "작업", value: "action", sortable: false, align: "center" },
+      { text: "수령상태", value: "state", sortable: true, filterable: false, align: "center" },
+      { text: "작업", value: "action", sortable: false, filterable: false, align: "center" },
     ],
     tdItems: [],
   }),
@@ -101,6 +116,9 @@ export default {
     this.getAllBill();
   },
   methods: {
+    inputSearch(event){
+      this.search=event.target.value;
+    },
     // 수령 상태 출력 변환
     isReceived: function (val) {
       if (val == null || val== undefined) return "수령 전";
@@ -233,6 +251,17 @@ export default {
 </script>
 
 <style scoped>
+.search-area{
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  outline: 1px solid black;
+}
+#search-input{
+  padding-left: 4px;
+}
+
 .tables {
   width: 100%;
   max-width: 1200px;
@@ -247,7 +276,7 @@ export default {
   justify-content: space-between;
 }
 
-.loaded-table-title-area {
+.title-area {
   width: fit-content;
   padding-bottom: 8px;
   border-bottom: 3px solid skyblue;
@@ -278,11 +307,12 @@ export default {
   background-color: white;
   border: 1px solid;
   text-align: center;
+  align-self: flex-end;
 }
 
 .icon-in-btn {
   margin-left: 4px;
-}
+  }
 
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {

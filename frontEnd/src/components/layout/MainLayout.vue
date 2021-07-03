@@ -12,6 +12,12 @@
     <header id="app-header">
       <v-spacer />
       <div class="btn-group">
+        <v-btn id="add-user-btn" elevation="0" @click="openUserDialog">
+          <span class="btn-text">사용자 관리</span>
+          <v-icon class="icon-in-btn" >
+            mdi-account-multiple
+          </v-icon>
+        </v-btn>
         <v-btn id="load-excel-btn" elevation="0" @click="openExcelDialog">
           <span class="btn-text">Excel 불러오기</span>
           <v-icon class="icon-in-btn" color="rgb(31, 111, 68)">
@@ -54,16 +60,19 @@
 import Board from "/src/components/boards/Board";
 import ExcelBoard from "/src/components/boards/ExcelBoard";
 import UpdateBoard from "/src/components/boards/UpdateBoard";
+import UserBoard from "/src/components/boards/UserBoard";
 
 export default {
   components: {
     Board,
     ExcelBoard,
     UpdateBoard,
+    UserBoard,
 
   },
   data: () => ({
     dialog:false,
+    userDialog:false,
     excelDialog: false,
     updateDialog: false,
     selectedBoard:null,
@@ -89,11 +98,22 @@ export default {
     },
   },
   methods: {
+    //유저 다이얼로그 열기
+    openUserDialog(){
+      this.selectedBoard=UserBoard,
+      this.userDialog = true;
+      this.dialog = this.userDialog;
+    },
     //엑셀 다이얼로그 열기
     openExcelDialog() {
       this.selectedBoard=ExcelBoard,
       this.excelDialog = true;
       this.dialog = this.excelDialog;
+    },
+    //유저 다이얼로그 닫기
+    closeUserDialog() {
+      this.userDialog = false;
+      this.dialog = this.userDialog;
     },
     //엑셀 다이얼로그 닫기
     closeExcelDialog() {
@@ -115,6 +135,7 @@ export default {
     closeDialog() {
       if(this.excelDialog) return this.closeExcelDialog();
       if(this.updateDialog) return this.closeUpdateDialog();
+      if(this.userDialog) return this.closeUserDialog();
     },
   },
 };
@@ -151,6 +172,12 @@ export default {
   background-color: white;
   border: 1px solid;
   text-align: center;
+}
+#add-user-btn{
+  background-color: white;
+  border: 1px solid;
+  text-align: center;
+  margin-right: 8px; 
 }
 #contents-wrap {
   min-height: 90vh;

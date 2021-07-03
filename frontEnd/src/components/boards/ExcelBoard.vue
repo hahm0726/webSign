@@ -8,7 +8,6 @@
         timeout="2000"
         right
         top
-        class="snackbar mt-16"
       >
         <v-icon class="mr-2">mdi-check</v-icon>
         <span>{{msg}}</span>
