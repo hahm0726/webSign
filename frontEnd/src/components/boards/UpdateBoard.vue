@@ -294,8 +294,7 @@ export default {
       
       billApi
         .updateBillList( this.toUpdateData)
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           this.getAllBill();
         })
         .catch((err) => {
@@ -304,8 +303,7 @@ export default {
 
       billApi
         .deleteBillList(this.toDeleteData)
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           this.getAllBill();
         })
         .catch((err) => {
