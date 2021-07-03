@@ -192,7 +192,7 @@ export default {
       }
       //실패
       else if (result === "fail") {
-        this.color="success";
+        this.color="error";
         this.msg=msg;
       }
       this.snackbar=true;
