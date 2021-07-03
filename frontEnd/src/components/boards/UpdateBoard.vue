@@ -66,66 +66,72 @@
 
         <template v-slot:[`item.idx`]="{ item }">
           <input
-            :id="item.idx + '_idx'"
             class="input-idx"
             type="number"
             :value="item.idx"
             placeholder="입력 필수(중복X)"
-            @input="updateIdx($event, item)"
+            @keydown.tab="tabFunc($event,item,isIdxDuplicated)"
+            @keyup.enter="isIdxDuplicated($event,item)"
+            @blur="blurFunc($event,item,item.idx,updateIdx)"
           />
         </template>
         <template v-slot:[`item.name`]="{ item }">
           <input
-            :id="item.idx + '_name'"
             type="text"
             :value="item.name"
-            @input="updateName($event, item)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,item,item.name,updateName)"
           />
         </template>
         <template v-slot:[`item.birthDate`]="{ item }">
           <input
-            :id="item.idx + 'birthDate'"
             type="text"
             :value="item.birthDate"
             placeholder="yyyy-mm-dd"
-            @input="updateBirthDate($event, item)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,item,item.birthDate,updateBirthDate)"
           />
         </template>
         <template v-slot:[`item.location`]="{ item }">
           <input
-            :id="item.idx + '_location'"
             type="text"
             :value="item.location"
-            @input="updateLocation($event, item)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,item,item.location,updateLocation)"
           />
         </template>
         <template v-slot:[`item.amount`]="{ item }">
           <input
-            :id="item.idx + '_amount'"
             type="number"
             :value="item.amount"
-            @input="updateAmount($event, item)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,item,item.amount,updateAmount)"
           />
         </template>
         <template v-slot:[`item.receivedDate`]="{ item }">
           <input
-            :id="item.idx + '_receivedDate'"
             type="text"
             :value="item.receivedDate"
             placeholder="yyyy-mm-dd"
-            @input="updateReceivedDate($event, item)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,item,item.receivedDate,updateReceivedDate)"
           />
         </template>
         <template v-slot:[`item.signature`]="{ item }">
           <v-icon disabled v-if="item.signature == undefined"
             >mdi-file-cancel-outline</v-icon
           >
-          <v-icon v-else @click="openSignatureDialog(item)">
+          <v-icon v-else @focus="$event.target.blur()" @click="openSignatureDialog(item)">
             mdi-text-box-search-outline
           </v-icon>
         </template>
         <template v-slot:[`item.delete`]="{ item }">
-          <v-icon @click="deleteItem(item)">
+          <v-icon @focus="$event.target.blur()" @click="deleteItem(item)">
             mdi-delete
           </v-icon>
         </template>
@@ -197,6 +203,14 @@ export default {
   methods: {
     //다이얼로그 닫기 동작
     closeUpdateDialog() {
+      if(!this.btnActivate){
+        if(confirm("데이터 수정이 완료되지 않았습니다. 그대로 닫겠습니까?")){
+          this.$emit("closeDialog");
+          this.initTempData();
+          this.getAllBill();
+        }
+        return;
+      }
       this.$emit("closeDialog");
     },
     //임시 데이터(삭제할 데이터, 업데이트할 데이터)를 빈값으로 초기화
@@ -260,11 +274,12 @@ export default {
       this.signatureDialog = false;
     },
     //연번 유효성 검증
-    //1.빈 값 검사 2. 연번 중복
+    //1.빈 값 검사
     idxValidation(){
       const idxInputs = document.getElementsByClassName("input-idx");
       for (let i=0; i< idxInputs.length;i++){
         if(idxInputs[i].value == ""){
+          alert("연번을 입력해주세요(숫자)");
           idxInputs[i].classList.add("validation-err");
           idxInputs[i].focus();
           return false;
@@ -275,13 +290,13 @@ export default {
     },
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
     updateDb() {
-      if(!this.idxValidation()){return;}
-      const updateDataArr = this.toUpdateData;
-      console.log(updateDataArr);
+      if(!this.idxValidation()){return;} 
+      
       billApi
-        .updateBillList(updateDataArr)
+        .updateBillList( this.toUpdateData)
         .then((res) => {
           console.log(res);
+          this.getAllBill();
         })
         .catch((err) => {
           console.log(err);
@@ -291,57 +306,104 @@ export default {
         .deleteBillList(this.toDeleteData)
         .then((res) => {
           console.log(res);
+          this.getAllBill();
         })
         .catch((err) => {
           console.log(err);
         });
 
-      this.getAllBill();
+      
       this.initTempData();
     },
+    //idx-input 엔터로 입력 완료 시 연번 중복 확인 중복
+    isIdxDuplicated (event,item){
+      const inputedVal= event.target.value;
+      for(var i=0; i<this.totalData.length;i++){
+        //새로 생성되는 데이터를 위해 널값은 중복으로 감지 X
+        if(inputedVal===null || inputedVal==="") continue;
+        if(item === this.totalData[i]) continue; //자기 자신의 값인 경우 중복X
+        if(inputedVal == this.totalData[i].idx){
+          event.target.focus();
+          event.target.value=null;
+          event.target.classList.add("duplicated-err");
+          alert(`해당 연번 ${inputedVal}이 이미 존재합니다.`); 
+          return false;
+        }
+      }
+      event.target.classList.remove("duplicated-err");
+      event.target.classList.remove("validation-err");
+      //기존의 데이터 값과 변경된 값이 같으면 굳이 업데이트 목록에 추가X
+      event.target.blur(event,item); 
+       return true;
+    },
+    tabFunc(event,item,validate){
+      if(validate===undefined){event.target.blur(); return;}
+      if(!validate(event,item)){
+        event.preventDefault();
+      }
+    },
+    //blurEvent 처리함수
+    blurFunc(event,item,origin,updateFunc){
+      const inputedValue = event.target.value;
+      //event가 key.up enter로 blur처리된 경우
+      if(event.relatedTarget===null){
+        //입력된 값이 기존의 데이터 연번과 같을 경우 업데이트 목록 추가X
+        if(inputedValue == origin){return;}
+        updateFunc(inputedValue,item);
+        return;
+      }
+      //key.up enter로 blur 처리되지 않은 경우
+      event.target.value = origin;
+    },
+
     //연번 데이터 수정 input handler
-    updateIdx(event, item) {
-      item.idx = event.target.value;
+    updateIdx(inputedVal,item) {
+      
+      item.idx = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
       }
     },
     //이름 데이터 수정 input handler
-    updateName(event, item) {
-      item.name = event.target.value;
+    updateName(inputedVal, item) {
+      item.name = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
       }
     },
     //생년월일 데이터 수정 input handler
-    updateBirthDate(event, item) {
-      item.birthDate = event.target.value;
+    updateBirthDate(inputedVal, item) {
+      if(inputedVal==="" && item.birthDate==null){return;}
+      item.birthDate = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
       }
     },
     //거주동 데이터 수정 input handler
-    updateLocation(event, item) {
-      item.location = event.target.value;
+    updateLocation(inputedVal, item) {
+      if(inputedVal==="" && item.location==null){return;}
+      item.location = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
       }
     },
     //수량 데이터 수정 input handler
-    updateAmount(event, item) {
-      item.amount = event.target.value;
+    updateAmount(inputedVal, item) {
+      if(inputedVal==="" && item.amount==null){return;}
+      item.amount = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
       }
     },
     //수령일 데이터 수정 input handler
-    updateReceivedDate(event, item) {
-      item.receivedDate = event.target.value;
+    updateReceivedDate(inputedVal, item) {
+      if(inputedVal==="" && item.receivedDate==null){return;}
+      item.receivedDate = inputedVal;
       const prevLen = this.toUpdateDataSet.size;
       if(this.toUpdateDataSet.add(item).size !=prevLen){
         this.toUpdateData.push(item);
@@ -450,15 +512,20 @@ export default {
   width: 30%;
 }
 .input-idx {
-  width: 80% !important;
+  width: 100% !important;
 }
 .loaded-table input[type="number"]::-webkit-outer-spin-button,
 .loaded-table input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-.validation-err:focus{
+.validation-err{
   outline:2px solid red;
+  border-radius: 2px;
+}
+.duplicated-err{
+  outline:2px solid red;
+  border-radius: 2px;
 }
 
 @media screen and (max-width: 600px) {

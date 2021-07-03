@@ -5,6 +5,7 @@
       fullscreen
       hide-overlay
       transition="dialog-bottom-transition"
+      persistent
     >
       <component :is="selectedBoard" @closeDialog="closeDialog"></component>
     </v-dialog>
