@@ -1,5 +1,24 @@
 <template>
   <v-card>
+    <!-- 토스트 메시지 -->
+      <v-snackbar
+        absolute
+        :color="color"
+        v-model="snackbar"
+        timeout="2000"
+        right
+        top
+        class="snackbar mt-16"
+      >
+        <v-icon class="mr-2">mdi-check</v-icon>
+        <span>{{msg}}</span>
+        <template v-slot:action="{ attrs }">
+          <v-btn color="white" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <!-- 토스트 메시지 끝 -->
     <header id="dialog-header">
       <div class="dialog-header-wrap">
         <input
@@ -88,6 +107,9 @@ import * as billApi from "/src/api/billApi"
 
 export default {
   data: () => ({
+    snackbar:false,
+    color:null,
+    msg:null,
     noDataText: "아직 불러온 데이터가 없습니다",
     thItems: [
       { text: "연번", value: "idx", sortable: false, align: "center" },
@@ -104,7 +126,7 @@ export default {
     ],
     excelData: [],
   }),
-  
+
   methods: {
     //다이얼로그 닫기 동작
     closeExcelDialog() {
@@ -164,14 +186,27 @@ export default {
       fileinput.value = null;
       this.excelData = [];
     },
-
+    callToast(msg,result){
+      if (result === "success") {
+        this.color="success";
+        this.msg=msg;
+      }
+      //실패
+      else if (result === "fail") {
+        this.color="success";
+        this.msg=msg;
+      }
+      this.snackbar=true;
+    },
     //읽은 엑셀 데이터 DB에 저장
     saveExcelData(){
       billApi.createBillList(this.excelData)
       .then(()=>{
+        this.clearTable();
+        this.callToast("저장완료","success");
       })
-      .catch(err=>{
-        console.log(err);
+      .catch(()=>{
+        this.callToast("저장실패","fail");
       })
     },
     //해당 데이터 행 삭제
@@ -187,6 +222,7 @@ export default {
 </script>
 
 <style scoped>
+
 #dialog-header {
   border: 2px solid black;
   padding: 0;

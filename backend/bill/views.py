@@ -55,10 +55,8 @@ class BillUpdateAPIView(APIView):
 
 class BillDeleteAPIView(APIView):
     def post(self, request):
-        print(request.data)
-        for data in request.data:
-            print("data:" + str(data))
-            bill = get_object_or_404(Bill, id=data.id)
+        for id in request.data:
+            bill = get_object_or_404(Bill, id=id)
         
 
             if bill:

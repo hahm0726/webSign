@@ -1,5 +1,24 @@
 <template>
   <v-card>
+    <!-- 토스트 메시지 -->
+      <v-snackbar
+        absolute
+        :color="color"
+        v-model="snackbar"
+        timeout="2000"
+        right
+        top
+        class="snackbar mt-16"
+      >
+        <v-icon class="mr-2">mdi-check</v-icon>
+        <span>{{msg}}</span>
+        <template v-slot:action="{ attrs }">
+          <v-btn color="white" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <!-- 토스트 메시지 끝 -->
     <header id="dialog-header">
       <div class="dialog-header-wrap">
         <v-spacer></v-spacer>
@@ -149,6 +168,9 @@ export default {
     ImgDialog,
   },
   data: () => ({
+    snackbar:false,
+    color:null,
+    msg:null,
     headerOption: {
       "sort-icon": null,
     },
@@ -201,6 +223,18 @@ export default {
   },
 
   methods: {
+    callToast(msg,result){
+      if (result === "success") {
+        this.color="success";
+        this.msg=msg;
+      }
+      //실패
+      else if (result === "fail") {
+        this.color="success";
+        this.msg=msg;
+      }
+      this.snackbar=true;
+    },
     //다이얼로그 닫기 동작
     closeUpdateDialog() {
       if(!this.btnActivate){
@@ -292,24 +326,30 @@ export default {
     updateDb() {
       if(!this.idxValidation()){return;} 
       
-      billApi
-        .updateBillList( this.toUpdateData)
-        .then(() => {
-          this.getAllBill();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      billApi
-        .deleteBillList(this.toDeleteData)
-        .then(() => {
-          this.getAllBill();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
+      if(this.toUpdateData.length != 0){
+        billApi
+          .updateBillList( this.toUpdateData)
+          .then(() => {
+            this.getAllBill();
+            this.callToast("수정완료","success");
+          })
+          .catch((err) => {
+            this.callToast("수정실패","fail");
+            console.log(err);
+          });
+      }
+      if(this.toDeleteData.length != 0){
+        billApi
+          .deleteBillList(this.toDeleteData)
+          .then(() => {
+            this.callToast("수정 완료","success");
+            this.getAllBill();
+          })
+          .catch((err) => {
+            this.callToast("수정실패","fail");
+            console.log(err);
+          });
+      }
       
       this.initTempData();
     },
@@ -409,7 +449,16 @@ export default {
     },
     //데이터 한 행 추가
     addData() {
-      let newData = {id:null,};
+      let newData = {
+        id:null,
+        idx:null,
+        name:null,
+        birthDate:null,
+        location:null,
+        amount:null,
+        receivedDate:null,
+        signature:null,
+        };
       this.toCreateData.push(newData);
       this.totalData.unshift(newData);
     },

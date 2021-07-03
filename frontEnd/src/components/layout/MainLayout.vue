@@ -25,7 +25,24 @@
       </div>
     </header>
     <v-main>
-      
+      <!-- 토스트 메시지 -->
+      <v-snackbar
+        :color="color"
+        absolute
+        v-model="snackbar"
+        :timeout="this.$store.state.toast.timeout"
+        right
+        top
+      >
+        <v-icon class="mr-2">mdi-check</v-icon>
+        <span>{{ this.$store.state.toast.message }}</span>
+        <template v-slot:action="{ attrs }">
+          <v-btn color="white" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <!-- 토스트 메시지 끝 -->
       <v-container id="contents-wrap" class="pt-2">
         <component :is="selectedComponent"></component>
       </v-container>
@@ -56,7 +73,20 @@ export default {
     selectedComponent: function () {
       return Board;
     },
-    
+    color: {
+      get() {
+        return this.$store.getters.getColor;
+      },
+      set() {},
+    },
+    snackbar: {
+      get() {
+        return this.$store.getters.getSnackbar;
+      },
+      set(val) {
+        this.$store.commit("setSnackbar", val);
+      },
+    },
   },
   methods: {
     //엑셀 다이얼로그 열기

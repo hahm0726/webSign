@@ -57,13 +57,22 @@ export default {
         date = ("0"+date).slice(-2);
 
         this.item.receivedDate= year+"-"+month+"-"+date;
-
+        
         billApi.updateBill(this.item.id,this.item)
         .then(()=>{
           this.closeDialog();
+          this.$store.dispatch("callToast", {
+            msg: "서명 완료",
+            result: "success",
+          });
           this.$emit('reRender');
         })
-        .catch(err=>{console.log(err)});
+        .catch(()=>{
+          this.$store.dispatch("callToast", {
+            msg: "서명 실패",
+            result: "fail",
+          });
+        });
       },
 
       //다이얼로그 닫기

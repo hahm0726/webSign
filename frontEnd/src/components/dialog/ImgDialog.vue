@@ -31,11 +31,20 @@ export default {
           this.item.state=false;
           this.item.receivedDate= null;
   
-          billApi.updateBill(this.item.idx,this.item)
+          billApi.updateBill(this.item.id,this.item)
           .then(()=>{
             this.closeDialog();
+            this.$store.dispatch("callToast", {
+              msg: "서명 삭제 완료",
+              result: "success",
+            });
           })
-          .catch(err=>{console.log(err)});
+          .catch(()=>{
+            this.$store.dispatch("callToast", {
+              msg: "서명 삭제 실패",
+              result: "fail",
+            });
+          });
         }else{
           return;
         }
