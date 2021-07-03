@@ -67,6 +67,13 @@
         <template v-slot:[`item.password`]="{ item }">
           <input :disabled="!item.hasOwnProperty('beforeSave')" class="password-input" type="password" :value="item.password" placeholder="(비밀번호 입력)"/>
         </template>
+        <template v-slot:[`item.userType`]="{ item }">
+          <select :disabled="!item.hasOwnProperty('beforeSave')" class="userType-select" v-model="item.userType">
+            <option disabled value="">권한선택</option>
+            <option value="1">관리자</option>
+            <option value="2">일반</option>
+          </select>
+        </template>
         <template v-slot:[`item.action`]="{ item }">
           <v-icon v-if="item.beforeSave" class="mr-2" color="success" @click="saveItem(item)">
             mdi-check
@@ -92,17 +99,18 @@ export default {
     },
     noDataText: "아직 불러온 데이터가 없습니다",
     thItems: [
-      
       { text: "부서", value: "department", sortable: true, align: "center" },
       { text: "이름", value: "name", sortable: true, align: "center" },
       { text: "아이디", value: "username", sortable: false, align: "center" },
       { text: "패스워드", value: "password", sortable: false, align: "center" },
+      { text: "권한", value: "userType", sortable: false, align: "center" },
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
     totalUser:[
       {
         id:1,
         company:null,
+        userType:2,
         department:"환경",
         name:"홍길동",
         username:"hsh07260",
@@ -111,6 +119,7 @@ export default {
       {
         id:2,
         company:null,
+        userType:2,
         department:"환경",
         name:"최길자",
         username:"abc07260",
@@ -119,6 +128,7 @@ export default {
       {
         id:3,
         company:null,
+        userType:2,
         department:"환경",
         name:"홍길동",
         username:"hsh07260",
@@ -181,6 +191,7 @@ export default {
       const name = tr.getElementsByClassName("name-input");
       const username = tr.getElementsByClassName("username-input");
       const password = tr.getElementsByClassName("password-input");
+      //const userType = tr.getElementsByClassName("userType-select");
 
       if(this.validate_department(department.value)){
         department.classList.add("validation-err");
@@ -234,6 +245,7 @@ export default {
         name:null,
         username:null,
         password:null,
+        userType:"",
         beforeSave:true,
         };
       this.totalUser.unshift(newUser);
@@ -329,20 +341,19 @@ export default {
 .loaded-table input {
   text-align: center;
 }
-.loaded-table input[type="text"] {
+.loaded-table input[type="text"],
+.loaded-table select {
   width: 100%;
 }
-.loaded-table input[type="number"] {
-  width: 30%;
+
+.loaded-table select{
+  text-align-last: center;
+  text-align: center;
+  -ms-text-align-last: center;
+  -moz-text-align-last: center;
 }
-.input-idx {
-  width: 100% !important;
-}
-.loaded-table input[type="number"]::-webkit-outer-spin-button,
-.loaded-table input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+
+
 .validation-err{
   outline:2px solid red;
   border-radius: 2px;
