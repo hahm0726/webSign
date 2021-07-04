@@ -9,6 +9,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ModelClass = self.Meta.model
+        
+        if (validated_data["id"]):
+            del validated_data["id"]
+
         print(validated_data)
         instance = ModelClass._default_manager.create(**validated_data)
         instance.set_password(validated_data["password"])
