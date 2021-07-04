@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-#기본적으로 설치되어있던 장고 앱
+# 기본적으로 설치되어있던 장고 앱
 DJANGO_DFAULT_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,9 +39,10 @@ DJANGO_DFAULT_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-#생성한 앱
-CREATED_NEW_APP=[
+# 생성한 앱
+CREATED_NEW_APP = [
     'bill',
+    'users',
 ]
 
 #설치한 외부 라이브러리
@@ -51,7 +52,7 @@ EXTERN_LIBRARY=[
 ]
 
 
-INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP+ EXTERN_LIBRARY
+INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP + EXTERN_LIBRARY
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', # CORS 관련 추가
@@ -105,6 +106,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 4, # 패스워드 최소길이 설정
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -146,4 +150,5 @@ CORS_ORIGIN_WHITELIST = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-
+# AbstractUser 이용하여 커스텀한 유저 모델 등록
+AUTH_USER_MODEL = "users.User"
