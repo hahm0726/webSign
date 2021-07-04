@@ -1,23 +1,23 @@
 <template>
   <v-card>
     <!-- 토스트 메시지 -->
-      <v-snackbar
-        absolute
-        :color="color"
-        v-model="snackbar"
-        timeout="2000"
-        right
-        top
-      >
-        <v-icon class="mr-2">mdi-check</v-icon>
-        <span>{{msg}}</span>
-        <template v-slot:action="{ attrs }">
-          <v-btn color="white" text v-bind="attrs" @click="snackbar = false">
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
-      <!-- 토스트 메시지 끝 -->
+    <v-snackbar
+      absolute
+      :color="color"
+      v-model="snackbar"
+      timeout="2000"
+      right
+      top
+    >
+      <v-icon class="mr-2">mdi-check</v-icon>
+      <span>{{ msg }}</span>
+      <template v-slot:action="{ attrs }">
+        <v-btn color="white" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+    <!-- 토스트 메시지 끝 -->
     <header id="dialog-header">
       <div class="dialog-header-wrap">
         <v-spacer></v-spacer>
@@ -56,27 +56,60 @@
         </template>
 
         <template v-slot:[`item.department`]="{ item }">
-          <input :disabled="!item.hasOwnProperty('beforeSave')" class="department-input" type="text" :value="item.department" placeholder="(부서 입력)"/>
+          <input
+            :disabled="!item.hasOwnProperty('beforeSave')"
+            class="department-input"
+            type="text"
+            :value="item.department"
+            placeholder="(부서 입력)"
+          />
         </template>
         <template v-slot:[`item.name`]="{ item }">
-          <input :disabled="!item.hasOwnProperty('beforeSave')" class="name-input" type="text" :value="item.name" placeholder="(이름 입력)"/>
+          <input
+            :disabled="!item.hasOwnProperty('beforeSave')"
+            class="name-input"
+            type="text"
+            :value="item.name"
+            placeholder="(이름 입력)"
+          />
         </template>
         <template v-slot:[`item.username`]="{ item }">
-          <input :disabled="!item.hasOwnProperty('beforeSave')" class="username-input" type="text" :value="item.username" placeholder="(아이디 입력)"/>
+          <input
+            :disabled="!item.hasOwnProperty('beforeSave')"
+            class="username-input"
+            type="text"
+            :value="item.username"
+            placeholder="(아이디 입력)"
+          />
         </template>
         <template v-slot:[`item.password`]="{ item }">
-          <input :disabled="!item.hasOwnProperty('beforeSave')" class="password-input" type="password" :value="item.password" placeholder="(비밀번호 입력)"/>
+          <input
+            :disabled="!item.hasOwnProperty('beforeSave')"
+            class="password-input"
+            type="password"
+            :value="item.password"
+            placeholder="(비밀번호 입력)"
+          />
         </template>
         <template v-slot:[`item.userType`]="{ item }">
           <!--유저타입-->
-          <select :disabled="!item.hasOwnProperty('beforeSave')" class="userType-select" v-model="item.userType">
+          <select
+            :disabled="!item.hasOwnProperty('beforeSave')"
+            class="userType-select"
+            v-model="item.userType"
+          >
             <option disabled value="">권한선택</option>
             <option value="1">관리자</option>
             <option value="2">일반</option>
           </select>
         </template>
         <template v-slot:[`item.action`]="{ item }">
-          <v-icon v-if="item.beforeSave" class="mr-2" color="success" @click="saveItem(item)">
+          <v-icon
+            v-if="item.beforeSave"
+            class="mr-2"
+            color="success"
+            @click="saveItem(item)"
+          >
             mdi-check
           </v-icon>
           <v-icon color="error" @click="deleteItem(item)">
@@ -89,12 +122,13 @@
 </template>
 
 <script>
+import * as billApi from "/src/api/billApi";
 
 export default {
   data: () => ({
-    snackbar:false,
-    color:null,
-    msg:null,
+    snackbar: false,
+    color: null,
+    msg: null,
     headerOption: {
       "sort-icon": null,
     },
@@ -107,86 +141,86 @@ export default {
       { text: "권한", value: "userType", sortable: false, align: "center" },
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
-    totalUser:[
+    totalUser: [
       {
-        id:1,
-        company:null,
-        userType:2,
-        department:"환경",
-        name:"홍길동",
-        username:"hsh07260",
-        password:"@@hsh07260",
+        id: 1,
+        company: null,
+        userType: 2,
+        department: "환경",
+        name: "홍길동",
+        username: "hsh07260",
+        password: "@@hsh07260",
       },
       {
-        id:2,
-        company:null,
-        userType:2,
-        department:"환경",
-        name:"최길자",
-        username:"abc07260",
-        password:"1234",
+        id: 2,
+        company: null,
+        userType: 2,
+        department: "환경",
+        name: "최길자",
+        username: "abc07260",
+        password: "1234",
       },
       {
-        id:3,
-        company:null,
-        userType:2,
-        department:"환경",
-        name:"홍길동",
-        username:"hsh07260",
-        password:"fasdf",
+        id: 3,
+        company: null,
+        userType: 2,
+        department: "환경",
+        name: "홍길동",
+        username: "hsh07260",
+        password: "fasdf",
       },
     ],
   }),
 
   methods: {
-    closeUserDialog(){
+    closeUserDialog() {
       this.$emit("closeDialog");
     },
-    callToast(msg,result){
-      this.snackbar=false;
+    callToast(msg, result) {
+      this.snackbar = false;
       if (result === "success") {
-        this.color="success";
-        this.msg=msg;
+        this.color = "success";
+        this.msg = msg;
       }
       //실패
       else if (result === "fail") {
-        this.color="success";
-        this.msg=msg;
+        this.color = "success";
+        this.msg = msg;
       }
-      this.snackbar=true;
+      this.snackbar = true;
     },
-    validate_department(val){
+    validate_department(val) {
       console.log(val);
-      if(val==null || val==undefined || val==""){
+      if (val == null || val == undefined || val == "") {
         alert("부서를 입력해주세요");
         return false;
       }
       return true;
     },
-    validate_name(val){
-      if(val==null || val==undefined || val==""){
+    validate_name(val) {
+      if (val == null || val == undefined || val == "") {
         console.log("aaaa");
         alert("이름을 입력해주세요");
         return false;
       }
       return true;
     },
-    validate_username(val){
-      if(val==null || val==undefined || val==""){
+    validate_username(val) {
+      if (val == null || val == undefined || val == "") {
         alert("아이디를 입력해주세요");
         return false;
       }
       return true;
     },
-    validate_password(val){
-      if(val==null || val==undefined || val==""){
+    validate_password(val) {
+      if (val == null || val == undefined || val == "") {
         alert("비밀번호를 입력해주세요");
         return false;
       }
       return true;
     },
 
-    isValid(event){
+    isValid(event) {
       const tr = event.target.parentNode.parentNode;
       const department = tr.getElementsByClassName("department-input");
       const name = tr.getElementsByClassName("name-input");
@@ -194,22 +228,22 @@ export default {
       const password = tr.getElementsByClassName("password-input");
       //const userType = tr.getElementsByClassName("userType-select");
 
-      if(this.validate_department(department.value)){
+      if (this.validate_department(department.value)) {
         department.classList.add("validation-err");
         department.focus();
         return false;
       }
-      if(!this.validate_name(name.value)){
+      if (!this.validate_name(name.value)) {
         name.classList.add("validation-err");
         name.focus();
         return false;
       }
-      if(!this.validate_username(username.value)){
+      if (!this.validate_username(username.value)) {
         username.classList.add("validation-err");
         username.focus();
         return false;
       }
-      if(!this.validate_password(password.value)){
+      if (!this.validate_password(password.value)) {
         password.classList.add("validation-err");
         password.focus();
         return false;
@@ -220,39 +254,44 @@ export default {
       password.classList.remove("validation-err");
       return true;
     },
-    saveItem(item){
-       if(confirm("해당 유저를 저장하시겠습니까?")){
-        item.beforeSave=false;
-        delete item.beforeSave; 
+    saveItem(item) {
+      if (confirm("해당 유저를 저장하시겠습니까?")) {
+        item.beforeSave = false;
+        delete item.beforeSave;
         //axios create 코드
-        this.callToast("사용자 생성 완료","success");
+        billApi
+          .createUser(item)
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log(err.response);
+          });
       }
     },
     //해당 데이터 행 삭제. 백엔드의 쉬운 처리를 위해 toDeleteData에 idx에 담기
     deleteItem(item) {
-      if(confirm("해당 유저를 삭제하시겠습니까?")){
+      if (confirm("해당 유저를 삭제하시겠습니까?")) {
         const toDeleteItemIndex = this.totalUser.indexOf(item);
         this.totalUser.splice(toDeleteItemIndex, 1);
-        if(!Object.prototype.hasOwnProperty.call(item,"beforeSave")){
+        if (!Object.prototype.hasOwnProperty.call(item, "beforeSave")) {
           //axios delete 코드
-          this.callToast("사용자 삭제 완료","success");
+          this.callToast("사용자 삭제 완료", "success");
         }
       }
-      
     },
-   
-   
+
     //데이터 한 행 추가
     addUser() {
       let newUser = {
-        id:null,
-        department:null,
-        name:null,
-        username:null,
-        password:null,
-        userType:"",
-        beforeSave:true,
-        };
+        id: null,
+        department: null,
+        name: null,
+        username: null,
+        password: null,
+        userType: "",
+        beforeSave: true,
+      };
       this.totalUser.unshift(newUser);
     },
   },
@@ -339,25 +378,23 @@ export default {
   width: 100%;
 }
 
-.loaded-table select{
+.loaded-table select {
   text-align-last: center;
   text-align: center;
   -ms-text-align-last: center;
   -moz-text-align-last: center;
 }
 
-
-.validation-err{
-  outline:2px solid red;
+.validation-err {
+  outline: 2px solid red;
   border-radius: 2px;
 }
-.duplicated-err{
-  outline:2px solid red;
+.duplicated-err {
+  outline: 2px solid red;
   border-radius: 2px;
 }
 
 @media screen and (max-width: 600px) {
-
   .btn-group {
     display: flex;
     margin-right: 8px;

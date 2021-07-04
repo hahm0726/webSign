@@ -8,7 +8,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         (
             "기본정보",
             {
-                "fields": ["username", "password", "code"]
+                "fields": ["username", "password", "userType", "department", "company"]
             }
         )
     ]

@@ -6,7 +6,8 @@ class User(AbstractUser):
     username = models.CharField(
         verbose_name="아이디", max_length=150, unique=True)
     name = models.CharField(verbose_name="이름", max_length=50, blank=True, null=True)
+    userType = models.CharField(verbose_name="유저타입", max_length=20, blank=True, null=True)
     department = models.CharField(verbose_name="부서", max_length=50, blank=True, null=True)
     company = models.CharField(
-        verbose_name="회사코드", max_length=4
+        verbose_name="회사코드", max_length=4, null=True, blank=True
     )

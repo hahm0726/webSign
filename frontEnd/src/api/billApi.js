@@ -47,6 +47,24 @@ function deleteBillList(billListData) {
   return axiosService.post(url, billListData);
 }
 
+/* 유저 리스트 요청 */
+function getUsers() {
+  const url = "/users/api/user/";
+  return axiosService.get(url);
+}
+
+/* 유저 생성 요청 */
+function createUser(data) {
+  const url = "/users/api/user/";
+  return axiosService.post(url, data);
+}
+
+/* 유저 삭제 요청 */
+function deleteUser(data) {
+  const url = "/users/api/user/";
+  return axiosService.delete(url + data.id);
+}
+
 export {
   createBill,
   getBill,
@@ -56,4 +74,7 @@ export {
   createBillList,
   updateBillList,
   deleteBillList,
+  getUsers,
+  createUser,
+  deleteUser,
 };
