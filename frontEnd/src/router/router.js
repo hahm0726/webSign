@@ -15,10 +15,9 @@ const routes = [
   },
   {
     path: "/Home",
-    name: "MainLayout",
+    name: "Home",
     component: MainLayout,
   },
-  
 ];
 
 const router = new Router({
