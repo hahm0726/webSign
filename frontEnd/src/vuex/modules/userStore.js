@@ -17,6 +17,13 @@ const userStore = {
       state.access_token = payload.tokens.access_token;
       state.refresh_token = payload.tokens.refresh_token;
     },
+    setToken: function(state, payload) {
+      state.access_token = payload.access_token;
+      state.refresh_token = payload.refresh_token;
+    },
+    setAccess: function(state, payload) {
+      state.access_token = payload;
+    },
   },
   actions: {},
 };
