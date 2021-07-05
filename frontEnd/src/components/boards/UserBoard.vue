@@ -28,7 +28,7 @@
     </header>
     <main class="contents-wrap">
       <v-data-table
-        class="tables loaded-table"
+        class="tables user-table"
         mobile-breakpoint="0"
         :no-data-text="noDataText"
         :headers="thItems"
@@ -37,9 +37,9 @@
         hide-default-footer
       >
         <template v-slot:top>
-          <div class="loaded-table-top">
-            <div class="loaded-table-title-area">
-              <div class="loaded-table-title table-title-text">
+          <div class="user-table-top">
+            <div class="user-table-title-area">
+              <div class="user-table-title table-title-text">
                 <span class="title-text">사용자 목록</span>
                 <v-icon class="title-icon" color="black">
                   mdi-account-multiple
@@ -47,9 +47,13 @@
               </div>
             </div>
             <div class="btn-group">
-              <v-btn id="table-add-btn" color="success" @click="addUser">
-                <span class="btn-text">사용자 추가</span>
+              <v-btn id="table-add-btn" color="success" v-if="beforeCreate" @click="createUser">
+                <span class="btn-text">사용자 생성</span>
                 <v-icon class="icon-in-btn"> mdi-plus </v-icon>
+              </v-btn>
+              <v-btn id="table-add-btn" color="primary" v-else @click="saveItem">
+                <span class="btn-text">생성 완료</span>
+                <v-icon class="icon-in-btn"> mdi-check </v-icon>
               </v-btn>
             </div>
           </div>
@@ -57,46 +61,63 @@
 
         <template v-slot:[`item.department`]="{ item }">
           <input
-            :disabled="!item.hasOwnProperty('beforeSave')"
+            :disabled="item !== newUser"
             class="department-input"
             type="text"
             :value="item.department"
+            @input="inputFunc($event)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,'department',item)"
             placeholder="(부서 입력)"
           />
         </template>
         <template v-slot:[`item.name`]="{ item }">
           <input
-            :disabled="!item.hasOwnProperty('beforeSave')"
+            :disabled="item !== newUser"
             class="name-input"
             type="text"
             :value="item.name"
+            @input="inputFunc($event)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,'name',item)"
             placeholder="(이름 입력)"
           />
         </template>
         <template v-slot:[`item.username`]="{ item }">
           <input
-            :disabled="!item.hasOwnProperty('beforeSave')"
+            :disabled="item !== newUser"
             class="username-input"
             type="text"
             :value="item.username"
+            @input="inputFunc($event)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,'username',item)"
             placeholder="(아이디 입력)"
           />
         </template>
         <template v-slot:[`item.password`]="{ item }">
           <input
-            :disabled="!item.hasOwnProperty('beforeSave')"
+            :disabled="item !== newUser"
             class="password-input"
             type="password"
             :value="item.password"
+            @input="inputFunc($event)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,'password',item)"
             placeholder="(비밀번호 입력)"
           />
         </template>
         <template v-slot:[`item.userType`]="{ item }">
           <!--유저타입-->
           <select
-            :disabled="!item.hasOwnProperty('beforeSave')"
+            :disabled="selectDisabled(item)"
             class="userType-select"
             v-model="item.userType"
+            @change="updateUserType(item)"
           >
             <option disabled value="">권한선택</option>
             <option value="1">관리자</option>
@@ -104,15 +125,10 @@
           </select>
         </template>
         <template v-slot:[`item.action`]="{ item }">
-          <v-icon
-            v-if="item.beforeSave"
-            class="mr-2"
-            color="success"
-            @click="saveItem(item)"
+          <v-icon v-if="item.userType !=='0'" 
+                  color="error" 
+                  @click="deleteItem(item)"
           >
-            mdi-check
-          </v-icon>
-          <v-icon color="error" @click="deleteItem(item)">
             mdi-delete
           </v-icon>
         </template>
@@ -122,13 +138,15 @@
 </template>
 
 <script>
-import * as billApi from "/src/api/billApi";
+import * as userApi from "/src/api/userApi";
 
 export default {
   data: () => ({
+    beforeCreate: true,
     snackbar: false,
     color: null,
     msg: null,
+    newUser:{},
     headerOption: {
       "sort-icon": null,
     },
@@ -141,38 +159,34 @@ export default {
       { text: "권한", value: "userType", sortable: false, align: "center" },
       { text: "작업", value: "action", sortable: false, align: "center" },
     ],
-    totalUser: [
-      {
-        id: 1,
-        company: null,
-        userType: 2,
-        department: "환경",
-        name: "홍길동",
-        username: "hsh07260",
-        password: "@@hsh07260",
-      },
-      {
-        id: 2,
-        company: null,
-        userType: 2,
-        department: "환경",
-        name: "최길자",
-        username: "abc07260",
-        password: "1234",
-      },
-      {
-        id: 3,
-        company: null,
-        userType: 2,
-        department: "환경",
-        name: "홍길동",
-        username: "hsh07260",
-        password: "fasdf",
-      },
-    ],
+    totalUser: [],
   }),
-
+  created(){
+    this.getAllUser();
+  },
   methods: {
+    //select 사용 가능 여부 처리 함수
+    selectDisabled(item){
+      if(!this.beforeCreate && item === this.newUser) return false;
+      //새로운 유저 생성 전 이거나 유저타입이 슈퍼유저가 아닌 경우
+      if(this.beforeCreate && item.userType !== '0')return false;
+      return true;
+    },
+
+    //유저타입값 변경에 의한 데이터 변경 axios
+    updateUserType(item){
+      if(item===this.newUser){return;}
+      const data = {userType:item.userType};
+      userApi
+          .updateUser(item.id,data)
+          .then(() => {
+            this.callToast("권한 변경 완료", "success");
+          })
+          .catch((err) => {
+            this.callToast("권한 변경 실패", "fail");
+            console.log(err.response);
+          });
+    },
     closeUserDialog() {
       this.$emit("closeDialog");
     },
@@ -184,34 +198,74 @@ export default {
       }
       //실패
       else if (result === "fail") {
-        this.color = "success";
+        this.color = "error";
         this.msg = msg;
       }
       this.snackbar = true;
     },
+    tabFunc(event){
+      event.target.blur();
+    },
+    inputFunc(event){
+      event.target.classList.remove("validation-err");
+    },  
+    /*
+    blurEvent 처리함수
+    inputName:입력받는 속성
+    item: 해당 item 객체
+    origin: 해당 속성의 원본값
+    */
+    blurFunc(event,inputName,item){
+      const inputedValue = event.target.value;
+      //event가 key.up enter로 blur처리된 경우
+      if(event.relatedTarget===null){
+        this.inputVal(inputName,inputedValue,item);
+        return;
+      }
+      //key.up enter로 blur 처리되지 않은 경우
+      event.target.value = item[inputName];
+    },
+
+    //데이터 input handler
+    inputVal(inputName,inputedVal, item) {
+      item[inputName] = inputedVal;
+    },
+
+    //부서 유효성 검사
     validate_department(val) {
-      console.log(val);
       if (val == null || val == undefined || val == "") {
         alert("부서를 입력해주세요");
         return false;
       }
       return true;
     },
+
+    //이름 유효성 검사
     validate_name(val) {
       if (val == null || val == undefined || val == "") {
-        console.log("aaaa");
         alert("이름을 입력해주세요");
         return false;
       }
       return true;
     },
+
+    //아이디 유효성 검사
     validate_username(val) {
       if (val == null || val == undefined || val == "") {
         alert("아이디를 입력해주세요");
         return false;
       }
+      var idPattern = new RegExp('[^a-zA-Z0-9]'); //아이디 패턴검사식
+
+      if (idPattern.test(val)) {
+        alert("아이디를 영문자와 숫자로 입력해 주세요.");
+        return false;
+      }
+
       return true;
     },
+
+    //비밀번호 유효성 검사
     validate_password(val) {
       if (val == null || val == undefined || val == "") {
         alert("비밀번호를 입력해주세요");
@@ -220,51 +274,60 @@ export default {
       return true;
     },
 
-    isValid(event) {
-      const tr = event.target.parentNode.parentNode;
-      const department = tr.getElementsByClassName("department-input");
-      const name = tr.getElementsByClassName("name-input");
-      const username = tr.getElementsByClassName("username-input");
-      const password = tr.getElementsByClassName("password-input");
-      //const userType = tr.getElementsByClassName("userType-select");
-
-      if (this.validate_department(department.value)) {
+    isValid() {
+      const department = document.querySelector(".department-input");
+      const name = document.querySelector(".name-input");
+      const username = document.querySelector(".username-input");
+      const password = document.querySelector(".password-input");
+      //부서 유효성 검사
+      if (!this.validate_department(department.value)) {
         department.classList.add("validation-err");
         department.focus();
         return false;
       }
-      if (!this.validate_name(name.value)) {
+      //이름 유효성 검사
+      else if (!this.validate_name(name.value)) {
         name.classList.add("validation-err");
         name.focus();
         return false;
       }
-      if (!this.validate_username(username.value)) {
+      //아이디 유효성 검사
+      else if (!this.validate_username(username.value)) {
         username.classList.add("validation-err");
         username.focus();
         return false;
       }
-      if (!this.validate_password(password.value)) {
+      //비밀번호 유효성 검사
+      else if (!this.validate_password(password.value)) {
         password.classList.add("validation-err");
         password.focus();
         return false;
       }
-      department.classList.remove("validation-err");
-      name.classList.remove("validation-err");
-      username.classList.remove("validation-err");
-      password.classList.remove("validation-err");
       return true;
     },
-    saveItem(item) {
-      if (confirm("해당 유저를 저장하시겠습니까?")) {
-        item.beforeSave = false;
-        delete item.beforeSave;
-        //axios create 코드
-        billApi
-          .createUser(item)
+    getAllUser(){
+      userApi
+          .getUsers()
           .then((res) => {
-            console.log(res);
+            this.totalUser=res.data;
           })
           .catch((err) => {
+            console.log(err.response);
+          });
+    },
+    saveItem() {
+      if (confirm("해당 유저를 저장하시겠습니까?")) {
+        if(!this.isValid()) return;
+        //axios create 코드
+        userApi
+          .createUser(this.newUser)
+          .then(() => {
+            this.beforeCreate = true;
+            this.getAllUser();
+            this.callToast("사용자 생성 완료", "success");
+          })
+          .catch((err) => {
+            this.callToast("사용자 생성 실패", "fail");
             console.log(err.response);
           });
       }
@@ -273,28 +336,40 @@ export default {
     deleteItem(item) {
       if (confirm("해당 유저를 삭제하시겠습니까?")) {
         const toDeleteItemIndex = this.totalUser.indexOf(item);
-        this.totalUser.splice(toDeleteItemIndex, 1);
-        if (!Object.prototype.hasOwnProperty.call(item, "beforeSave")) {
-          //axios delete 코드
+        //axios delete 코드
+        if (item !== this.newUser) {
+          userApi
+          .deleteUser(item.id)
+          .then(() => {
+            this.beforeCreate = true;
+            this.getAllUser();
+            this.callToast("사용자 삭제 완료", "success");
+          })
+          .catch((err) => {
+            console.log(err.response);
+            this.callToast("사용자 삭제 실패", "fail");
+          });
+        }else{
+          this.beforeCreate=true;
+          this.totalUser.splice(toDeleteItemIndex, 1);
           this.callToast("사용자 삭제 완료", "success");
         }
       }
     },
-
-    //데이터 한 행 추가
-    addUser() {
-      let newUser = {
-        id: null,
+    //유저생성
+    createUser() {
+      this.newUser = {
         department: null,
         name: null,
         username: null,
         password: null,
         userType: "",
-        beforeSave: true,
+        company:null,
       };
-      this.totalUser.unshift(newUser);
+      this.beforeCreate=false;
+      this.totalUser.unshift(this.newUser);
     },
-  },
+  }
 };
 </script>
 
@@ -328,10 +403,10 @@ export default {
   width: 100%;
   max-width: 1200px;
 }
-.loaded-table {
+.user-table {
   margin-top: 16px;
 }
-.loaded-table-top {
+.user-table-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -340,12 +415,12 @@ export default {
   margin-right: 8px;
   text-align: center;
 }
-.loaded-table-title-area {
+.user-table-title-area {
   width: fit-content;
   padding-bottom: 8px;
   border-bottom: 3px solid skyblue;
 }
-.loaded-table-title {
+.user-table-title {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -370,15 +445,15 @@ export default {
   display: none;
 }
 
-.loaded-table input {
+.user-table input {
   text-align: center;
 }
-.loaded-table input[type="text"],
-.loaded-table select {
+.user-table input[type="text"],
+.user-table select {
   width: 100%;
 }
 
-.loaded-table select {
+.user-table select {
   text-align-last: center;
   text-align: center;
   -ms-text-align-last: center;
