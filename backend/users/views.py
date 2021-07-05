@@ -12,10 +12,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def chk_username(self, request):
         username = request.GET.get('username')
+        print(username)
         try:
-            if not username:
-                return Response({"msg": "아이디를 입력해주세요"}, status=406)
-
             obj = models.User.objects.get(username=username)
             return Response({"msg": "사용중인 id 입니다."}, status=406)
         except models.User.DoesNotExist:

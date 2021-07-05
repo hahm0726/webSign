@@ -262,6 +262,15 @@ export default {
         return false;
       }
 
+      //아이디 중복 검사
+      userApi.isUserNameDuplicated(val)
+      .then(()=>{
+      })
+      .catch((err)=>{
+        alert(err.data[0]);
+        return false;
+      })
+
       return true;
     },
 
@@ -274,7 +283,7 @@ export default {
       return true;
     },
 
-    isValid() {
+    async isValid() {
       const department = document.querySelector(".department-input");
       const name = document.querySelector(".name-input");
       const username = document.querySelector(".username-input");
@@ -292,7 +301,7 @@ export default {
         return false;
       }
       //아이디 유효성 검사
-      else if (!this.validate_username(username.value)) {
+      else if (this.validate_username(username.value)) {
         username.classList.add("validation-err");
         username.focus();
         return false;

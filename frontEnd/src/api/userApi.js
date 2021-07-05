@@ -12,14 +12,22 @@ function createUser(data) {
   return axiosService.post(url, data);
 }
 
+/* 유저 삭제 요청 */
 function deleteUser(userId) {
   const url = `/users/api/user/${userId}/`;
   return axiosService.delete(url);
 }
 
+/* 유저 수정 요청 */
 function updateUser(userId, data) {
   const url = `/users/api/user/${userId}/`;
   return axiosService.patch(url, data);
+}
+
+/* 아이디 중복 확인 요청 */
+function isUserNameDuplicated(username) {
+  const url = `users/api/user/chk_username/?username=${username}`;
+  return axiosService.get(url);
 }
 
 export {
@@ -27,4 +35,5 @@ export {
   createUser,
   deleteUser,
   updateUser,
+  isUserNameDuplicated,
 };
