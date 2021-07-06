@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,8 +46,8 @@ CREATED_NEW_APP = [
     'users',
 ]
 
-#설치한 외부 라이브러리
-EXTERN_LIBRARY=[
+# 설치한 외부 라이브러리
+EXTERN_LIBRARY = [
     'rest_framework',
     'corsheaders',
 ]
@@ -55,7 +56,7 @@ EXTERN_LIBRARY=[
 INSTALLED_APPS = DJANGO_DFAULT_APPS + CREATED_NEW_APP + EXTERN_LIBRARY
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', # CORS 관련 추가
+    'corsheaders.middleware.CorsMiddleware',  # CORS 관련 추가
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 4, # 패스워드 최소길이 설정
+            'min_length': 4,  # 패스워드 최소길이 설정
         }
     },
     {
@@ -152,3 +153,33 @@ CORS_ALLOW_CREDENTIALS = True
 
 # AbstractUser 이용하여 커스텀한 유저 모델 등록
 AUTH_USER_MODEL = "users.User"
+
+# REST JWT 사용설정
+REST_FRAMEWORK = {
+    # API 접근시 필요한 권한 설정
+    # "DEFAULT_PERMISSION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
+    # 로그인과 관련된 클래스에 JWT사용
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+# JWT 옵션 설정
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),  # 액세스 토큰 유효기간 설정
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=20),  # 리프레시 토큰 유효기간 설정
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,  # 비밀키 설정(장고와 같은 비밀키므로 변경 필요)
+    "VERIFYING_KEY": None,
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "AUTH_HEADER_TYPES": ("JWT",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "JTI_CLAIM": "jti",
+}

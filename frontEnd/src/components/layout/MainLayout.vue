@@ -11,10 +11,10 @@
     </v-dialog>
     <header id="app-header">
       <v-spacer />
-      <div class="btn-group">
+      <div class="btn-group" v-if="$store.state.userStore.userType !== '2'">
         <v-btn id="add-user-btn" elevation="0" @click="openUserDialog">
           <span class="btn-text">사용자 관리</span>
-          <v-icon class="icon-in-btn" >
+          <v-icon class="icon-in-btn">
             mdi-account-multiple
           </v-icon>
         </v-btn>
@@ -68,18 +68,17 @@ export default {
     ExcelBoard,
     UpdateBoard,
     UserBoard,
-
   },
   data: () => ({
-    dialog:false,
-    userDialog:false,
+    dialog: false,
+    userDialog: false,
     excelDialog: false,
     updateDialog: false,
-    selectedBoard:null,
+    selectedBoard: null,
   }),
   computed: {
     //선택된 컴포넌트 반환
-    selectedComponent: function () {
+    selectedComponent: function() {
       return Board;
     },
     color: {
@@ -99,15 +98,13 @@ export default {
   },
   methods: {
     //유저 다이얼로그 열기
-    openUserDialog(){
-      this.selectedBoard=UserBoard,
-      this.userDialog = true;
+    openUserDialog() {
+      (this.selectedBoard = UserBoard), (this.userDialog = true);
       this.dialog = this.userDialog;
     },
     //엑셀 다이얼로그 열기
     openExcelDialog() {
-      this.selectedBoard=ExcelBoard,
-      this.excelDialog = true;
+      (this.selectedBoard = ExcelBoard), (this.excelDialog = true);
       this.dialog = this.excelDialog;
     },
     //유저 다이얼로그 닫기
@@ -122,8 +119,7 @@ export default {
     },
     //수정 다이얼로그 열기
     openUpdateDialog() {
-      this.selectedBoard=UpdateBoard,
-      this.updateDialog = true;
+      (this.selectedBoard = UpdateBoard), (this.updateDialog = true);
       this.dialog = this.updateDialog;
     },
     //수정 다이얼로그 닫기
@@ -133,9 +129,9 @@ export default {
     },
     //열린 다이얼로그에 따라 다이얼로그 닫기 함수 선택 제공
     closeDialog() {
-      if(this.excelDialog) return this.closeExcelDialog();
-      if(this.updateDialog) return this.closeUpdateDialog();
-      if(this.userDialog) return this.closeUserDialog();
+      if (this.excelDialog) return this.closeExcelDialog();
+      if (this.updateDialog) return this.closeUpdateDialog();
+      if (this.userDialog) return this.closeUserDialog();
     },
   },
 };
@@ -173,11 +169,11 @@ export default {
   border: 1px solid;
   text-align: center;
 }
-#add-user-btn{
+#add-user-btn {
   background-color: white;
   border: 1px solid;
   text-align: center;
-  margin-right: 8px; 
+  margin-right: 8px;
 }
 #contents-wrap {
   min-height: 90vh;
