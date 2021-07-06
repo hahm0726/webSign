@@ -25,9 +25,9 @@ function updateUser(userId, data) {
 }
 
 /* 아이디 중복 확인 요청 */
-function isUserNameDuplicated(username) {
+async function isUserNameDuplicated(username) {
   const url = `users/api/user/chk_username/?username=${username}`;
-  return axiosService.get(url);
+  return await axiosService.get(url);
 }
 
 export {

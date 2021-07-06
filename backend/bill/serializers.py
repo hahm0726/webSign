@@ -46,6 +46,15 @@ class BillSerializer(serializers.ModelSerializer):
         
         return date
 
+    def validate_amount(self, amount):
+        """
+        이름 유효성 검사
+        """
+        if amount == "" or amount == None:
+            amount= 0
+
+        return amount
+        
     def validate_location(self, location):
         """
         거주동 유효성 검사

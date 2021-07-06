@@ -69,7 +69,7 @@
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'department',item)"
-            placeholder="(부서 입력)"
+            :placeholder="placehorderFunc('(부서 입력)',item)"
           />
         </template>
         <template v-slot:[`item.name`]="{ item }">
@@ -82,7 +82,7 @@
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'name',item)"
-            placeholder="(이름 입력)"
+            :placeholder="placehorderFunc('(이름 입력)',item)"
           />
         </template>
         <template v-slot:[`item.username`]="{ item }">
@@ -95,7 +95,7 @@
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'username',item)"
-            placeholder="(아이디 입력)"
+            :placeholder="placehorderFunc('(아이디 입력)',item)"
           />
         </template>
         <template v-slot:[`item.password`]="{ item }">
@@ -108,7 +108,7 @@
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'password',item)"
-            placeholder="(비밀번호 입력)"
+            :placeholder="placehorderFunc('(비밀번호 입력)',item)"
           />
         </template>
         <template v-slot:[`item.userType`]="{ item }">
@@ -165,6 +165,11 @@ export default {
     this.getAllUser();
   },
   methods: {
+    placehorderFunc(text,item){
+      if(item===this.newUser){
+        return text;
+      }
+    },
     //select 사용 가능 여부 처리 함수
     selectDisabled(item){
       if(!this.beforeCreate && item === this.newUser) return false;
@@ -250,7 +255,7 @@ export default {
     },
 
     //아이디 유효성 검사
-    validate_username(val) {
+    async validate_username(val) {
       if (val == null || val == undefined || val == "") {
         alert("아이디를 입력해주세요");
         return false;
@@ -264,11 +269,13 @@ export default {
 
       //아이디 중복 검사
       userApi.isUserNameDuplicated(val)
-      .then(()=>{
+      .then((res)=>{
+        if(res.data.state==="1"){
+          alert("이미 사용중인 아이디 입니다.");
+          return false;
+        }
       })
-      .catch((err)=>{
-        alert(err.data[0]);
-        return false;
+      .catch(()=>{
       })
 
       return true;
@@ -288,6 +295,7 @@ export default {
       const name = document.querySelector(".name-input");
       const username = document.querySelector(".username-input");
       const password = document.querySelector(".password-input");
+
       //부서 유효성 검사
       if (!this.validate_department(department.value)) {
         department.classList.add("validation-err");
@@ -301,7 +309,7 @@ export default {
         return false;
       }
       //아이디 유효성 검사
-      else if (this.validate_username(username.value)) {
+      else if (!await this.validate_username(username.value)) {
         username.classList.add("validation-err");
         username.focus();
         return false;
@@ -312,6 +320,7 @@ export default {
         password.focus();
         return false;
       }
+      
       return true;
     },
     getAllUser(){
@@ -324,21 +333,23 @@ export default {
             console.log(err.response);
           });
     },
-    saveItem() {
+    async saveItem() {
       if (confirm("해당 유저를 저장하시겠습니까?")) {
-        if(!this.isValid()) return;
-        //axios create 코드
-        userApi
-          .createUser(this.newUser)
-          .then(() => {
-            this.beforeCreate = true;
-            this.getAllUser();
-            this.callToast("사용자 생성 완료", "success");
-          })
-          .catch((err) => {
-            this.callToast("사용자 생성 실패", "fail");
-            console.log(err.response);
-          });
+        const validState = await this.isValid();
+        if(validState) {
+          //axios create 코드
+          userApi
+            .createUser(this.newUser)
+            .then(() => {
+              this.beforeCreate = true;
+              this.getAllUser();
+              this.callToast("사용자 생성 완료", "success");
+            })
+            .catch((err) => {
+              this.callToast("사용자 생성 실패", "fail");
+              console.log(err.response);
+            });
+          }
       }
     },
     //해당 데이터 행 삭제. 백엔드의 쉬운 처리를 위해 toDeleteData에 idx에 담기

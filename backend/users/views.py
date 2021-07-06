@@ -15,6 +15,6 @@ class UserViewSet(viewsets.ModelViewSet):
         print(username)
         try:
             obj = models.User.objects.get(username=username)
-            return Response({"msg": "사용중인 id 입니다."}, status=406)
+            return Response({"state": "1"}, status=200)
         except models.User.DoesNotExist:
-            return Response({"msg": "사용 가능한 id 입니다."}, status=200)
+            return Response({"state": "0"}, status=200)

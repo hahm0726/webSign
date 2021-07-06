@@ -325,7 +325,6 @@ export default {
     updateDb() {
       if(!this.idxValidation()){return;} 
       if(this.toUpdateData.length != 0){
-        console.log(this.toUpdateData);
         billApi
           .updateBillList(this.toUpdateData)
           .then(() => {

@@ -38,12 +38,13 @@ class BillUpdateAPIView(APIView):
     def post(self, request):
 
         for data in request.data:
-            
             if data["id"] is None:
                 del data["id"]
+                
                 res = BillSerializer(data=data)
                 if res.is_valid():
                     res.save()
+    
             else:
                 bill = get_object_or_404(Bill, id=data["id"])
                 res = BillSerializer(bill, data, partial=True)
