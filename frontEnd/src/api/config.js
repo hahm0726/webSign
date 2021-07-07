@@ -61,25 +61,27 @@ axiosService.interceptors.response.use(
       // 리프레시 토큰 이용하여 새로운 액세스 토큰 요청
       console.log("새로운 토큰 요청");
 
-      try {
-        const res = axiosService.post("/users/refresh/", {
+      axiosService
+        .post("/users/refresh/", {
           refresh: refreshToken,
+        })
+        .then((res) => {
+          console.log("액세스 토큰 재발급 성공");
+          // 세션 저장소의 액세스 토큰 업데이트
+          store.commit("setAccess", res.data.access);
+          // 원래 요청의 헤더에 있는 토큰 새로 발급받은 토큰으로 변경
+          originalRequest.headers.Authorization =
+            "JWT " + store.state.userStore.access_token;
+          // 실패했던 기존 요청 새로운 토큰 이용하여 다시 실행
+          return axios(originalRequest);
+        })
+        .catch((err) => {
+          console.log("액세스 토큰 재발급 실패(리프레시 토큰 만료)");
+          console.log(err.response);
+          sessionStorage.clear(); // 세션 저장소의 데이터 삭제
+          alert("세션이 만료되었습니다 다시 로그인 해주세요.");
+          window.location.href = "http://127.0.0.1:8080/";
         });
-        console.log("액세스 토큰 재발급 성공");
-        // 세션 저장소의 액세스 토큰 업데이트
-        store.commit("setAccess", res.data.access);
-        // 원래 요청의 헤더에 있는 토큰 새로 발급받은 토큰으로 변경
-        originalRequest.headers.Authorization =
-          "JWT " + store.state.userStore.access_token;
-        // 실패했던 기존 요청 새로운 토큰 이용하여 다시 실행
-        return axios(originalRequest);
-      } catch (err) {
-        console.log("액세스 토큰 재발급 실패(리프레시 토큰 만료)");
-        console.log(err.response);
-        sessionStorage.clear(); // 세션 저장소의 데이터 삭제
-        alert("세션이 만료되었습니다 다시 로그인 해주세요.");
-        window.location.href = "http://127.0.0.1:8080/";
-      }
     }
     return Promise.reject(error);
   }
