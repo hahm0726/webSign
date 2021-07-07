@@ -47,7 +47,7 @@ axiosService.interceptors.response.use(
       응답 에러 직전 호출됩니다.
       .catch() 으로 이어집니다.    
     */
-  async function(error) {
+  function(error) {
     // 에러에서 정보 추출
     const {
       config, // 실패한 기존 요청
@@ -62,7 +62,7 @@ axiosService.interceptors.response.use(
       console.log("새로운 토큰 요청");
 
       try {
-        const res = await axiosService.post("/users/refresh/", {
+        const res = axiosService.post("/users/refresh/", {
           refresh: refreshToken,
         });
         console.log("액세스 토큰 재발급 성공");
@@ -74,11 +74,11 @@ axiosService.interceptors.response.use(
         // 실패했던 기존 요청 새로운 토큰 이용하여 다시 실행
         return axios(originalRequest);
       } catch (err) {
+        console.log("액세스 토큰 재발급 실패(리프레시 토큰 만료)");
         console.log(err.response);
         sessionStorage.clear(); // 세션 저장소의 데이터 삭제
-        console.log("액세스 토큰 재발급 실패(리프레시 토큰 만료)");
         alert("세션이 만료되었습니다 다시 로그인 해주세요.");
-        window.location.href = axiosService.baseURL;
+        window.location.href = "http://127.0.0.1:8080/";
       }
     }
     return Promise.reject(error);
