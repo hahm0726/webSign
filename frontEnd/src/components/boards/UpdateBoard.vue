@@ -29,13 +29,16 @@
     <main class="contents-wrap">
       <v-data-table
         class="tables loaded-table"
+        :search="search"
+        no-data-text="데이터가 없습니다"
+        no-results-text="일치하는 검색 결과가 없습니다"
         mobile-breakpoint="0"
-        :no-data-text="noDataText"
         :headers="thItems"
         :items="totalData"
         :header-props="headerOption"
-        :footer-props="{itemsPerPage: 10,
-                    'items-per-page-options':[10]
+        hide-default-footer
+        :footer-props="{itemsPerPage: -1,
+                    'items-per-page-options':[-1]
                   }"
       >
         <template v-slot:top>
@@ -46,33 +49,34 @@
             ></img-dialog>
           </v-dialog>
           <div class="loaded-table-top">
-            <div class="loaded-table-title-area">
-              <div class="loaded-table-title table-title-text">
-                <span class="title-text">데이터 목록</span>
-                <v-icon class="title-icon" color="black">
-                  mdi-file-document-outline
-                </v-icon>
+            <div class="title-search-area">
+              <div class="title-area">
+                <div class="loaded-table-title table-title-text">
+                  <span class="title-text">데이터 목록</span>
+                  <v-icon class="title-icon" color="black">
+                    mdi-file-document-outline
+                  </v-icon>
+                </div>
+              </div>
+              <div class="search-area">
+               <v-icon>mdi-magnify</v-icon>
+               <input id="search-input" type="text" placeholder="검색" :value="search" @input="inputSearch($event)"/>
               </div>
             </div>
             <div class="btn-group">
-              <v-btn id="table-add-btn" color="success" @click="addData">
+              <v-btn v-if="beforeCreate" id="table-add-btn" @click="addData">
                 <span class="btn-text">데이터 추가</span>
                 <v-icon class="icon-in-btn"> mdi-plus </v-icon>
               </v-btn>
-              <v-btn
-                id="table-clear-btn"
-                color="error"
-                :disabled="btnActivate"
-                @click="recoveryAllData"
-              >
-                <span class="btn-text">데이터 되돌리기</span>
-                <v-icon class="icon-in-btn"> mdi-sync </v-icon>
+              <v-btn v-else id="table-add-btn" color="success" @click="addConfirm">
+                <span class="btn-text">추가 완료</span>
+                <v-icon class="icon-in-btn"> mdi-check </v-icon>
               </v-btn>
               <v-btn
                 id="save-to-db-btn"
                 class="white--text"
                 color="primary"
-                :disabled="btnActivate"
+                :disabled="toUpdateData.length==0 && toDeleteData.length==0"
                 @click="updateDb"
               >
                 <span class="btn-text"> 수정 완료</span>
@@ -84,67 +88,72 @@
 
         <template v-slot:[`item.idx`]="{ item }">
           <input
-            class="input-idx"
+            class="idx-input"
             type="number"
             :value="item.idx"
             placeholder="입력 필수(중복X)"
-            @keydown.tab="tabFunc($event,item,isIdxDuplicated)"
-            @keyup.enter="isIdxDuplicated($event,item)"
-            @blur="blurFunc($event,item,item.idx,updateIdx)"
+            @keydown.tab="tabFunc($event)"
+            @keyup.enter="$event.target.blur()"
+            @blur="blurFunc($event,'idx',item)"
           />
         </template>
         <template v-slot:[`item.name`]="{ item }">
           <input
+            class="name-input"
             type="text"
             :value="item.name"
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
-            @blur="blurFunc($event,item,item.name,updateName)"
+            @blur="blurFunc($event,'name',item)"
           />
         </template>
         <template v-slot:[`item.birthDate`]="{ item }">
           <input
+            class="birthDate-input"
             type="text"
             :value="item.birthDate"
             placeholder="yyyy-mm-dd"
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
-            @blur="blurFunc($event,item,item.birthDate,updateBirthDate)"
+            @blur="blurFunc($event,'birthDate',item)"
           />
         </template>
         <template v-slot:[`item.location`]="{ item }">
           <input
+            class="location-input"
             type="text"
             :value="item.location"
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
-            @blur="blurFunc($event,item,item.location,updateLocation)"
+            @blur="blurFunc($event,'location',item)"
           />
         </template>
         <template v-slot:[`item.amount`]="{ item }">
           <input
+            class="amount-input"
             type="number"
             :value="item.amount"
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
-            @blur="blurFunc($event,item,item.amount,updateAmount)"
+            @blur="blurFunc($event,'amount',item)"
           />
         </template>
         <template v-slot:[`item.receivedDate`]="{ item }">
           <input
+            class="receivedDate-input"
             type="text"
             :value="item.receivedDate"
             placeholder="yyyy-mm-dd"
             @keydown.tab="tabFunc($event)"
             @keyup.enter="$event.target.blur()"
-            @blur="blurFunc($event,item,item.receivedDate,updateReceivedDate)"
+            @blur="blurFunc($event,'receivedDate',item)"
           />
         </template>
         <template v-slot:[`item.signature`]="{ item }">
           <v-icon disabled v-if="item.signature == undefined"
-            >mdi-file-cancel-outline</v-icon
-          >
-          <v-icon v-else @focus="$event.target.blur()" @click="openSignatureDialog(item)">
+            >mdi-file-cancel-outline
+          </v-icon>
+          <v-icon v-else @click="openSignatureDialog(item)">
             mdi-text-box-search-outline
           </v-icon>
         </template>
@@ -167,38 +176,42 @@ export default {
     ImgDialog,
   },
   data: () => ({
+    search:"",
     snackbar:false,
     color:null,
     msg:null,
     headerOption: {
       "sort-icon": null,
     },
-    noDataText: "아직 불러온 데이터가 없습니다",
     thItems: [
       { text: "연번", value: "idx", sortable: true, align: "center" },
       { text: "이름", value: "name", sortable: true, align: "center" },
       {
         text: "생년월일",
         value: "birthDate",
+        filterable: false,
         sortable: true,
         align: "center",
       },
       { text: "거주동", value: "location", sortable: true, align: "center" },
-      { text: "수량", value: "amount", sortable: false, align: "center" },
+      { text: "수량", value: "amount", sortable: false, filterable: false, align: "center" },
       {
         text: "수령일",
         value: "receivedDate",
         sortable: false,
         align: "center",
       },
-      { text: "서명", value: "signature", sortable: false, align: "center" },
-      { text: "삭제", value: "delete", sortable: false, align: "center" },
+      { text: "서명", value: "signature", filterable: false, sortable: false, align: "center" },
+      { text: "작업", value: "delete", filterable: false, sortable: false, align: "center" },
     ],
+    toUpdateDataSet : new Set(),
     totalData: [],
     toDeleteData: [],
     toUpdateData: [],
     toCreateData: [],
-    toUpdateDataSet: new Set(),
+    beforeCreate:true,
+    beforeupdate:true,
+    newData:{},
     signatureDialog: false,
     selectedItem: {},
   }),
@@ -215,13 +228,15 @@ export default {
       
       if(this.toUpdateData.length !==0) return false
       if(this.toDeleteData.length !==0) return false
-      if(this.toCreateData.length !==0) return false
 
       return true;
     }
   },
 
   methods: {
+    inputSearch(event){
+      this.search=event.target.value;
+    },
     callToast(msg,result){
       if (result === "success") {
         this.color="success";
@@ -249,9 +264,9 @@ export default {
     //임시 데이터(삭제할 데이터, 업데이트할 데이터)를 빈값으로 초기화
     initTempData() {
       this.toDeleteData = [];
-      this.toUpdateData = [];
-      this.toCreateData = [];
       this.toUpdateDataSet = new Set();
+      this.toUpdateData = [];
+      this.beforeupdate=true;
     },
 
     //읽은 엑셀데이터 테이블 비우기
@@ -268,22 +283,15 @@ export default {
     //해당 데이터 행 삭제. 백엔드의 쉬운 처리를 위해 toDeleteData에 idx에 담기
     deleteItem(item) {
       const toDeleteItemIndex = this.totalData.indexOf(item);
-      const toCreateItemIndex = this.toCreateData.indexOf(item);
       const toUpdateItemIndex = this.toUpdateData.indexOf(item);
       //새로 만든 아이템이 삭제되는 경우
-      if(toCreateItemIndex !== -1){
-        this.toCreateData.splice(toCreateItemIndex, 1);
-        this.toUpdateData.splice(toUpdateItemIndex, 1);
-      }
-      //기존에 존제하던 아이템 삭제
-      else{
-        //기존에 존재하던 아이템 중 업데이트 중 지운 경우
-        if(toUpdateItemIndex !== -1){
-          this.toUpdateData.splice(toUpdateItemIndex, 1);
-        }
+      this.toUpdateData.splice(toUpdateItemIndex, 1);
+      this.totalData.splice(toDeleteItemIndex, 1);
+
+      if(item.id !== null){
         this.toDeleteData.push(item.id);
       }
-      this.totalData.splice(toDeleteItemIndex, 1);
+      console.log(this.toUpdateData.length);
     },
     //모든 bill데이터 받아오기
     getAllBill() {
@@ -306,10 +314,11 @@ export default {
       this.selectedItem = {};
       this.signatureDialog = false;
     },
+    
     //연번 유효성 검증
     //1.빈 값 검사
     idxValidation(){
-      const idxInputs = document.getElementsByClassName("input-idx");
+      const idxInputs = document.getElementsByClassName("idx-input");
       for (let i=0; i< idxInputs.length;i++){
         if(idxInputs[i].value == ""){
           alert("연번을 입력해주세요(숫자)");
@@ -324,6 +333,7 @@ export default {
     //수정 완료 저장해 둔 임시 삭제 리스트와 테이블에 남은 모든 데이터 패치
     updateDb() {
       if(!this.idxValidation()){return;} 
+
       if(this.toUpdateData.length != 0){
         billApi
           .updateBillList(this.toUpdateData)
@@ -351,100 +361,117 @@ export default {
       
       this.initTempData();
     },
-    //idx-input 엔터로 입력 완료 시 연번 중복 확인 중복
-    isIdxDuplicated (event,item){
-      const inputedVal= event.target.value;
+    //입력받은 값 중복 체크
+    isDuplicated (val,inputName,item){
       for(var i=0; i<this.totalData.length;i++){
-        //새로 생성되는 데이터를 위해 널값은 중복으로 감지 X
-        if(inputedVal===null || inputedVal==="") continue;
         if(item === this.totalData[i]) continue; //자기 자신의 값인 경우 중복X
-        if(inputedVal == this.totalData[i].idx){
-          event.target.focus();
-          event.target.value=null;
-          event.target.classList.add("duplicated-err");
-          alert(`해당 연번 ${inputedVal}이 이미 존재합니다.`); 
-          return false;
+        if(val == this.totalData[i][inputName]){
+          return true;
         }
       }
-      event.target.classList.remove("duplicated-err");
-      event.target.classList.remove("validation-err");
-      //기존의 데이터 값과 변경된 값이 같으면 굳이 업데이트 목록에 추가X
-      event.target.blur(event,item); 
-       return true;
-    },
-    tabFunc(event,item,validate){
-      if(validate===undefined){event.target.blur(); return;}
-      if(!validate(event,item)){
-        event.preventDefault();
-      }
+      return false;
     },
     //blurEvent 처리함수
-    blurFunc(event,item,origin,updateFunc){
+    blurFunc(event,inputName,item){
       const inputedValue = event.target.value;
-      //event가 key.up enter로 blur처리된 경우
-      if(event.relatedTarget===null){
-        //입력된 값이 기존의 데이터 연번과 같을 경우 업데이트 목록 추가X
-        if(inputedValue == origin){return;}
-        updateFunc(inputedValue,item);
-        return;
+      //idx-input에서 blur가 발생한 경우
+      if(inputName == "idx"){
+        if(this.isDuplicated(inputedValue,inputName,item)){
+          event.target.classList.add("duplicated-err");
+          alert(`해당 연번 ${inputName}이 이미 존재합니다.`);
+          event.target.focus();
+          event.target.value=null;
+          return false;
+        } 
+        event.target.classList.remove("duplicated-err");
       }
-      //key.up enter로 blur 처리되지 않은 경우
-      event.target.value = origin;
+      event.target.classList.remove("validation-err");
+
+      this.addToUpdateData(item);
+
+      this.beforeupdate=false;
+      this.inputVal(inputName,inputedValue,item);
     },
 
-    //연번 데이터 수정 input handler
-    updateIdx(inputedVal,item) {
-      
-      item.idx = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
+    //데이터 input handler
+    inputVal(inputName,inputedVal, item) {
+      console.log(item);
+      item[inputName] = inputedVal;
+    },
+
+    addToUpdateData(item){
+      const prevSetLen = this.toUpdateDataSet.size;
+      this.toUpdateDataSet.add(item);
+      if(prevSetLen !== this.toUpdateDataSet.size){
         this.toUpdateData.push(item);
       }
     },
-    //이름 데이터 수정 input handler
-    updateName(inputedVal, item) {
-      item.name = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
-        this.toUpdateData.push(item);
-      }
+
+    tabFunc(event){
+      if(!event.target.blur()){event.preventDefault();}
     },
-    //생년월일 데이터 수정 input handler
-    updateBirthDate(inputedVal, item) {
-      if(inputedVal==="" && item.birthDate==null){return;}
-      item.birthDate = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
-        this.toUpdateData.push(item);
+
+
+    //이름 유효성 검사
+    validateName(val) {
+      if (val == null || val == undefined || val == "") {
+        val=null
       }
+      return val;
     },
-    //거주동 데이터 수정 input handler
-    updateLocation(inputedVal, item) {
-      if(inputedVal==="" && item.location==null){return;}
-      item.location = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
-        this.toUpdateData.push(item);
+
+    //생년월일 유효성 검사
+    validateBirthDate(val) {
+       if (val == null || val == undefined || val == "") {
+        val=""
       }
+      return val;
     },
-    //수량 데이터 수정 input handler
-    updateAmount(inputedVal, item) {
-      if(inputedVal==="" && item.amount==null){return;}
-      item.amount = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
-        this.toUpdateData.push(item);
+
+    //이름 유효성 검사
+    validateLocation(val) {
+       if (val == null || val == undefined || val == "") {
+        val=null
       }
+      return val;
     },
-    //수령일 데이터 수정 input handler
-    updateReceivedDate(inputedVal, item) {
-      if(inputedVal==="" && item.receivedDate==null){return;}
-      item.receivedDate = inputedVal;
-      const prevLen = this.toUpdateDataSet.size;
-      if(this.toUpdateDataSet.add(item).size !=prevLen){
-        this.toUpdateData.push(item);
+    //이름 유효성 검사
+    validateAmount(val) {
+       if (val == null || val == undefined || val == "") {
+        val=null
       }
+      return val;
     },
+    //생년월일 유효성 검사
+    validateReceivedDate(val) {
+       if (val == null || val == undefined || val == "") {
+        val=null
+      }
+      return val;
+    },
+  
+    //연번 유효성 검사
+    validateIdx(val) {
+      if (val == null || val == undefined || val == "") {
+        return false;
+      }
+      return true;
+    },
+
+    isValid(){
+      const Row = document.querySelector(".loaded-table tbody");
+      console.log(Row);
+      /*
+      const idx = document.getElementsByClassName(".idx-input");
+      const name = document.getElementsByClassName(".name-input");
+      const location = document.getElementsByClassName(".location-input");
+      const amount = document.getElementsByClassName(".amount-input");
+      const birthDate = document.getElementsByClassName(".birthDate-input");
+      const receivedDate = document.getElementsByClassName(".receivedDate-input");
+      */
+
+    },
+    
     //데이터 한 행 추가
     addData() {
       let newData = {
@@ -456,9 +483,9 @@ export default {
         amount:null,
         receivedDate:null,
         signature:null,
-        };
-      this.toCreateData.push(newData);
+      };
       this.totalData.unshift(newData);
+      this.addToUpdateData(this.totalData[0]);
     },
   },
 };
@@ -500,6 +527,7 @@ export default {
 }
 .loaded-table {
   margin-top: 16px;
+  margin-bottom: 16px;
 }
 .loaded-table-top {
   display: flex;
@@ -518,7 +546,7 @@ export default {
   text-align: center;
 }
 
-.loaded-table-title-area {
+.title-area {
   width: fit-content;
   padding-bottom: 8px;
   border-bottom: 3px solid skyblue;
@@ -527,6 +555,18 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.search-area{
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  outline: 1px solid black;
+}
+#search-input{
+  width:300px;
+  padding-left: 4px;
+  text-align: initial;
 }
 .table-title-text {
   font-size: 24px;
@@ -621,6 +661,10 @@ export default {
 }
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
+  #search-input{
+    font-size: 12px;
+    width:150px;
+  }
   .v-data-table::v-deep th {
     font-size: 2px !important;
     text-align: center;

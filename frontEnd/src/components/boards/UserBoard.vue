@@ -76,7 +76,7 @@
             type="text"
             :value="item.department"
             @input="inputFunc($event)"
-            @keydown.tab="tabFunc($event)"
+            @keydown.tab="$event.target.blur()"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'department',item)"
             :placeholder="placehorderFunc('(부서 입력)',item)"
@@ -89,7 +89,7 @@
             type="text"
             :value="item.name"
             @input="inputFunc($event)"
-            @keydown.tab="tabFunc($event)"
+            @keydown.tab="$event.target.blur()"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'name',item)"
             :placeholder="placehorderFunc('(이름 입력)',item)"
@@ -102,7 +102,7 @@
             type="text"
             :value="item.username"
             @input="inputFunc($event)"
-            @keydown.tab="tabFunc($event)"
+            @keydown.tab="$event.target.blur()"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'username',item)"
             :placeholder="placehorderFunc('(아이디 입력)',item)"
@@ -115,7 +115,7 @@
             type="password"
             :value="item.password"
             @input="inputFunc($event)"
-            @keydown.tab="tabFunc($event)"
+            @keydown.tab="$event.target.blur()"
             @keyup.enter="$event.target.blur()"
             @blur="blurFunc($event,'password',item)"
             :placeholder="placehorderFunc('(비밀번호 입력)',item)"
@@ -223,9 +223,7 @@ export default {
       }
       this.snackbar = true;
     },
-    tabFunc(event){
-      event.target.blur();
-    },
+
     inputFunc(event){
       event.target.classList.remove("validation-err");
     },  
@@ -237,13 +235,7 @@ export default {
     */
     blurFunc(event,inputName,item){
       const inputedValue = event.target.value;
-      //event가 key.up enter로 blur처리된 경우
-      if(event.relatedTarget===null){
-        this.inputVal(inputName,inputedValue,item);
-        return;
-      }
-      //key.up enter로 blur 처리되지 않은 경우
-      event.target.value = item[inputName];
+      this.inputVal(inputName,inputedValue,item);
     },
 
     //데이터 input handler
