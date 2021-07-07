@@ -10,29 +10,37 @@
       <component :is="selectedBoard" @closeDialog="closeDialog"></component>
     </v-dialog>
     <header id="app-header">
+      <div class="logo-area">
+        <v-img id="logo" :src="require(`/src/assets/logo.png`)"></v-img>
+      </div>
       <v-spacer />
-      <div class="btn-group" v-if="$store.state.userStore.userType !== '2'">
-        <v-btn id="add-user-btn" elevation="0" @click="openUserDialog">
+      <div class="btn-group">
+        <v-btn id="add-user-btn" v-if="renderByUserType" elevation="0" @click="openUserDialog">
           <span class="btn-text">사용자 관리</span>
           <v-icon class="icon-in-btn">
             mdi-account-multiple
           </v-icon>
         </v-btn>
-        <v-btn id="load-excel-btn" elevation="0" @click="openExcelDialog">
+        <v-btn id="load-excel-btn" v-if="renderByUserType" elevation="0" @click="openExcelDialog">
           <span class="btn-text">Excel 불러오기</span>
           <v-icon class="icon-in-btn" color="rgb(31, 111, 68)">
             mdi-microsoft-excel
           </v-icon>
         </v-btn>
-        <v-btn id="add-data-btn" elevation="0" @click="openUpdateDialog">
+        <v-btn id="add-data-btn" v-if="renderByUserType" elevation="0" @click="openUpdateDialog">
           <span class="btn-text">데이터 수정</span>
           <v-icon class="icon-in-btn">mdi-pencil-outline</v-icon>
         </v-btn>
+        <v-btn id="logout-btn" elevation="0" @click="logout">
+          <span class="btn-text">로그아웃</span>
+          <v-icon class="icon-in-btn">mdi-logout-variant</v-icon>
+        </v-btn>
       </div>
     </header>
-    <v-main>
+    <v-main class="main">
       <!-- 토스트 메시지 -->
       <v-snackbar
+        id="snackbar"
         :color="color"
         absolute
         v-model="snackbar"
@@ -95,6 +103,11 @@ export default {
         this.$store.commit("setSnackbar", val);
       },
     },
+    renderByUserType: function(){
+      const userType = this.$store.state.userStore.userType;
+      if(userType === "2" || userType === "") return false;
+      return true;
+    },
   },
   methods: {
     //유저 다이얼로그 열기
@@ -133,6 +146,11 @@ export default {
       if (this.updateDialog) return this.closeUpdateDialog();
       if (this.userDialog) return this.closeUserDialog();
     },
+    //로그아웃 버튼
+    logout(){
+      sessionStorage.clear();
+      this.$router.push({name: "Login"});
+    },
   },
 };
 </script>
@@ -147,8 +165,22 @@ export default {
   align-items: center;
   width: 100%;
   height: 60px;
-  border: 2px solid;
+  z-index: 100;
+  border-bottom: 1px solid;
+  background-color: white;
+  
 }
+
+
+.logo-area{
+  display: flex;
+}
+#logo{
+  height: 50px;
+  width:200px;
+  display: flex;
+}
+
 .btn-group {
   display: flex;
   justify-items: end;
@@ -164,10 +196,17 @@ export default {
   text-align: center;
   margin-right: 8px;
 }
+#logout-btn{
+  background-color: white;
+  border: 1px solid;
+  text-align: center;
+}
+
 #add-data-btn {
   background-color: white;
   border: 1px solid;
   text-align: center;
+  margin-right: 8px;
 }
 #add-user-btn {
   background-color: white;
@@ -187,6 +226,10 @@ export default {
 }
 
 @media screen and (max-width: 600px) {
+  .logo-area{
+  display: none;
+ }
+
   .btn-text {
     display: none;
   }

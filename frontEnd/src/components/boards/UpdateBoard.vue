@@ -574,7 +574,7 @@ export default {
 }
 
 .v-data-table::v-deep div.v-data-footer{
-  justify-content: center !important;
+  justify-content: flex-end !important;
 }
 @media screen and (max-width: 600px) {
   #file-input {

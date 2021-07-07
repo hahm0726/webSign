@@ -1,5 +1,10 @@
 import { axiosService } from "/src/api/config";
 
+/* 유저 로그인 요청 */
+function login(data) {
+  const url = "/users/login/";
+  return axiosService.post(url,data);
+}
 /* 유저 리스트 요청 */
 function getUsers() {
   const url = "/users/api/user/";
@@ -31,6 +36,7 @@ async function isUserNameDuplicated(username) {
 }
 
 export {
+  login,
   getUsers,
   createUser,
   deleteUser,

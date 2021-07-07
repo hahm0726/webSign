@@ -62,7 +62,7 @@ axiosService.interceptors.response.use(
       console.log("새로운 토큰 요청");
 
       try {
-        const res = await axios.post("http://127.0.0.1:8000/users/refresh/", {
+        const res = await axiosService.post("/users/refresh/", {
           refresh: refreshToken,
         });
         console.log("액세스 토큰 재발급 성공");
@@ -78,7 +78,7 @@ axiosService.interceptors.response.use(
         sessionStorage.clear(); // 세션 저장소의 데이터 삭제
         console.log("액세스 토큰 재발급 실패(리프레시 토큰 만료)");
         alert("세션이 만료되었습니다 다시 로그인 해주세요.");
-        window.location.href = "http://127.0.0.1:8080/";
+        window.location.href = axiosService.baseURL;
       }
     }
     return Promise.reject(error);

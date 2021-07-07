@@ -29,21 +29,31 @@
     <main class="contents-wrap">
       <v-data-table
         class="tables user-table"
+        :search="search"
+        no-data-text="데이터가 없습니다"
+        no-results-text="일치하는 검색 결과가 없습니다"
         mobile-breakpoint="0"
-        :no-data-text="noDataText"
         :headers="thItems"
         :items="totalUser"
         :header-props="headerOption"
-        hide-default-footer
+        :footer-props="{itemsPerPage: 10,
+                    'items-per-page-options':[10]
+                  }"
       >
         <template v-slot:top>
           <div class="user-table-top">
-            <div class="user-table-title-area">
-              <div class="user-table-title table-title-text">
-                <span class="title-text">사용자 목록</span>
-                <v-icon class="title-icon" color="black">
-                  mdi-account-multiple
-                </v-icon>
+            <div class="title-search-area">
+              <div class="title-area">
+                <div class="user-table-title table-title-text">
+                  <span class="title-text">사용자 목록</span>
+                  <v-icon class="title-icon" color="black">
+                    mdi-account-multiple
+                  </v-icon>
+                </div>
+              </div>
+              <div class="search-area">
+                <v-icon>mdi-magnify</v-icon>
+                <input id="search-input" type="text" placeholder="검색" :value="search" @input="inputSearch($event)"/>
               </div>
             </div>
             <div class="btn-group">
@@ -142,10 +152,12 @@ import * as userApi from "/src/api/userApi";
 
 export default {
   data: () => ({
+
     beforeCreate: true,
     snackbar: false,
     color: null,
     msg: null,
+    search:"",
     newUser:{},
     headerOption: {
       "sort-icon": null,
@@ -154,10 +166,10 @@ export default {
     thItems: [
       { text: "부서", value: "department", sortable: true, align: "center" },
       { text: "이름", value: "name", sortable: true, align: "center" },
-      { text: "아이디", value: "username", sortable: false, align: "center" },
-      { text: "패스워드", value: "password", sortable: false, align: "center" },
-      { text: "권한", value: "userType", sortable: false, align: "center" },
-      { text: "작업", value: "action", sortable: false, align: "center" },
+      { text: "아이디", value: "username", filterable: false, sortable: false, align: "center" },
+      { text: "패스워드", value: "password", filterable: false, sortable: false, align: "center" },
+      { text: "권한", value: "userType", filterable: false, sortable: false, align: "center" },
+      { text: "작업", value: "action", filterable: false, sortable: false, align: "center" },
     ],
     totalUser: [],
   }),
@@ -165,6 +177,9 @@ export default {
     this.getAllUser();
   },
   methods: {
+    inputSearch(event){
+      this.search=event.target.value;
+    },
     placehorderFunc(text,item){
       if(item===this.newUser){
         return text;
@@ -395,8 +410,8 @@ export default {
 
 <style scoped>
 #dialog-header {
-  border: 2px solid black;
   padding: 0;
+  margin-bottom: 0;
 }
 .dialog-header-wrap {
   margin: 0;
@@ -404,7 +419,8 @@ export default {
   padding-right: 8px;
   display: flex;
   align-items: center;
-  height: 60px;
+  height: 50px;
+  border-bottom: 1px solid;
 }
 
 #close-btn {
@@ -435,15 +451,29 @@ export default {
   margin-right: 8px;
   text-align: center;
 }
-.user-table-title-area {
+.title-area {
   width: fit-content;
   padding-bottom: 8px;
   border-bottom: 3px solid skyblue;
 }
+
+
 .user-table-title {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.search-area{
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  outline: 1px solid black;
+}
+#search-input{
+  width:300px;
+  padding-left: 4px;
+  text-align: initial;
 }
 .table-title-text {
   font-size: 24px;
@@ -478,6 +508,10 @@ export default {
   text-align: center;
   -ms-text-align-last: center;
   -moz-text-align-last: center;
+}
+
+.v-data-table::v-deep div.v-data-footer{
+  justify-content: flex-end !important;
 }
 
 .validation-err {
@@ -516,25 +550,29 @@ export default {
 }
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
+  #search-input{
+    font-size: 12px;
+    width:150px;
+  }
   .v-data-table::v-deep th {
-    font-size: 2px !important;
+    font-size: 16px !important;
     text-align: center;
     padding: 1px !important;
   }
   .v-data-table::v-deep td {
-    font-size: 1px !important;
+    font-size: 12px !important;
     padding: 1px !important;
   }
 }
 /*제일 작은 모바일 사이즈(가로) */
 @media screen and (min-width: 465px) and (max-width: 600px) {
   .v-data-table::v-deep th {
-    font-size: 2px !important;
+    font-size: 16px !important;
     text-align: center;
     padding: 1px !important;
   }
   .v-data-table::v-deep td {
-    font-size: 1px !important;
+    font-size: 12px !important;
     padding: 1px !important;
   }
 }

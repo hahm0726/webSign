@@ -39,7 +39,9 @@
         :no-data-text="noDataText"
         :headers="thItems"
         :items="excelData"
-        hide-default-footer
+        :footer-props="{itemsPerPage: 10,
+                    'items-per-page-options':[10]
+                  }"
       >
         <template v-slot:top>
           <div class="loaded-table-top">
@@ -316,7 +318,9 @@ export default {
     -webkit-appearance: none;
     margin: 0;
 }
-
+.v-data-table::v-deep div.v-data-footer{
+  justify-content: flex-end !important;
+}
 
 @media screen and (max-width: 600px) {
   #file-input {

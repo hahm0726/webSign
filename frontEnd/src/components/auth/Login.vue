@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import * as authApi from "/src/api/authApi"
 
 export default {
   data: () => {
@@ -79,13 +79,10 @@ export default {
     },
     // 로그인 함수 정의
     login() {
-      axios
-        .post("http://127.0.0.1:8000/users/login/", this.data)
+        authApi.login(this.data)
         .then((res) => {
           // 요청 성공시 실행
-          console.log(res);
           this.$store.commit("setUser", res.data);
-
           this.moveToHome();
         })
         .catch((err) => {

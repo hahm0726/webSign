@@ -26,7 +26,7 @@
             <div class="loaded-table-title table-title-text">
               <span class="title-input" role="textbox" @input="onTitleInput($event)" contenteditable>{{formTitle}}</span>
               <v-icon class="title-icon" color="black">
-                    mdi-file-document-outline
+                mdi-file-document-outline
               </v-icon>
             </div>
           </div>
@@ -333,7 +333,7 @@ export default {
   }
 
 .v-data-table::v-deep div.v-data-footer{
-  justify-content: center !important;
+  justify-content: flex-end !important;
 }
 /*제일 작은 모바일 사이즈(세로) */
 @media screen and (max-width: 465px) {
