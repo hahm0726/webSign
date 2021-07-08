@@ -166,8 +166,8 @@ REST_FRAMEWORK = {
 
 # JWT 옵션 설정
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),  # 액세스 토큰 유효기간 설정
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=20),  # 리프레시 토큰 유효기간 설정
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  # 액세스 토큰 유효기간 설정
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 리프레시 토큰 유효기간 설정
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
